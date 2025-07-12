@@ -1,0 +1,3311 @@
+FUNDAMENTALS OF ELECTRONICS FOR HIGH ENERGY
+PHYSICS
+
+Giovanni Franchi – AGE Scientific s.r.l.
+
+Preface
+I worked for about 30 years principally designing electronics for high-energy physics and
+ultrasound equipments for nondestructive testing (NDT). I decided to write this paper when I was
+invited to teach a course at UNICAMP, in Campinas, Brasil. The course was about electronics for
+high-energy physics. The aim of this paper is to point out the main problems in designing
+electronics to the students, by highlighting the concepts, the problems and avoiding tedious
+calculations. The writer is not a physicist but an electronic designer. The proposed problems for
+high-energy physics will be treated mainly from the point of view of electronics. This is an
+important result of this text. Hereafter it is assumed that the reader is familiar with basic electronic
+concepts as bias point, Bode-plots, equivalent circuits, op-amps and so on. It is expected that once
+the reader understands the concepts presented here, he can go ahead in analysis and design by
+himself. The analogue aspects of the design are principally treated, leaving as future the digital
+ones. I will appreciate any correction and any request for new items to add. My idea is to create a
+sort of “open source” paper for the benefit of all the students. Finally I apologize for my English
+but really I had no time for a better check of the first revision of the paper. However I hope it is
+plain and clear.
+I want to thank my AGE Scientific shareholders Andrea Puccini e Marco d’Inzeo who supported
+me in this project and Giancarlo Sportelli, a brilliant researcher at Pisa University and a friend of
+mine, who has accepted to revise this paper. Today the revision ends at chapter 6 included.
+I am writing this paper following the bright example of my teacher, professor S. N. Francaviglia,
+who taught me mathematics and student care with great commitment and passion.
+
+Rev. 2
+
+1
+
+1. INTRODUCTION
+In my long time spent in designing electronics for high-energy physics I collaborate with
+experimental physicists mainly to answer to the following questions:
+•
+•
+•
+
+Did anything interact with my detector?
+How much energy was left in the detector due to the interaction?
+When did the interaction occurred?
+
+Today, the answer to these questions is provided by an intensive use of electronics. Answering the
+first one requires discriminators, the second one charge-to-digital converters and the third one timeto digital converters. After this time, my point-of-view remains that of an electronic designer and I
+am not able to talk about the deep detectors operations. For this reason I think it is very important to
+try a merging between the physicists world and the electronic engineers world. Electronics now
+play a fundamental role in experiments for high-energy physics. But the first experiments did not
+use electronics at all, for example we can think to the bubble chambers. These detectors worked
+with great mechanical equipments and cameras, resulting in very slow acquisition rates. In those
+days the most sophisticated electronic equipments was counters using nixies or tunnel-diode
+discriminators, coming from the best oscilloscope technology. Amplifiers (and the first digital
+networks) used thermionic tubes and so on. Today things are different, detectors are very fast and
+granular, and electronics have become irreplaceable and much more sophisticated. Nevertheless the
+structure of the experiments is still the same, as depicted in figure 1.1. Power supplies are not
+shown in the figure. For conventional electronics power supplies do not differ too much each other
+but it is not the case for detectors. They can require low-noise, high-voltages power supplies whose
+description would be a topic for more than a book. Moreover, detector power supplies are matter for
+specialised designers, usually not the same designers that work on trigger or front-end electronics
+for high-energy physics. So no more words about detectors supplies. My choice is to highlight the
+analogue problems against the digital ones since I think the analogue designer is an extinguishing
+kind of engineer.
+
+DETECTOR
+
+FRONT-END
+
+DATA-ACQUISITION
+
+COMPUTER
+
+ELECTRONICS
+
+(DAQ)
+
+HOST
+
+TRIGGER
+
+Fig. 1.1 – Typical architecture of experiments
+In the figure above each block represents a specilisation for an experimental physic researcher. All
+the other blocks, excluding the detector, involve electronics, featuring hardware and software. In the
+following sections each block will be explained. The aim of electronics is to acquire only interesting
+data and to suppress the useless data and noise. Rejecting useless data is also known as zerosuppression. Due to the evolution of technology, particularly in analogue to digital converters and
+in field programmable gate arrays, new architectures in experimental physics have been proposed.
+These are based on fully digital signal processing, as depicted in figure 1.2.
+
+Rev. 2
+
+2
+
+DETECTOR
+
+ANALOG TO DIGITAL
+
+DIGITAL SIGNAL
+
+COMPUTER
+
+CONVERTER (A/D)
+
+PROCESSOR (DSP)
+
+HOST
+
+Fig. 1.2 – Typical new generation architecture of experiments
+In experiments of the new generation the trend is to digitize the detector output, then digitally to
+process this signal to obtain the trigger, the zero-suppression and transfer data to host computer.
+
+Rev. 2
+
+3
+
+2. FRONT-END ELECTRONICS
+Front-end electronics are the circuits that are directly connected to the detectors. These can include
+preamplifiers, discriminators, charge to digital converters, time to digital converters (TDC) and so
+on. Preamplifiers are used for the initial signal conditioning. There can be voltage, current or charge
+preamplifiers. Voltage-preamplifiers match the input and the output impedances to the detector
+output and to the following circuits. The key aspects in designing a voltage preamplifier are gain,
+noise and bandwidth. Current-preamplifiers behave as the voltage ones but they take as input the
+current output of the detector. Charge-preamplifiers integrate the detector output current. The
+output signal of a charge preamplifier is a kind of mathematical integration of the input signal. Its
+output rises to a peak value proportional to the input charge followed by a slow decay. The rise-time
+of a charge preamplifier output is the time required by the detector to release the charge. The most
+important aspects in designing a charge preamplifier are noise and sensitivity. The latter is the ratio
+between the peak output voltage and the charge input: its dimensions are Volt/Coulomb.
+Discriminators are electronic comparators. These circuits compare a signal with a threshold and
+assert their digital output when the signal exceeds the threshold. Usually a discriminator includes a
+one-shot circuit. The one-shot can be retriggerable (or not), resulting in an output whose width
+depends (or not) from the time that the input signal is over the threshold. The typical sensitivity of a
+discriminator is around a few mV over the threshold: this excess voltage is also called overdrive.
+There are different kinds of discriminators, the most common are: leading-edge, double-threshold
+and constant-fraction. Each one has an own characteristic and will be explained in the following
+sections. Charge to digital converters (QDC) integrate the current at their input during a fixed
+time. They performs an equivalent of the definite mathematic integration of the input current, which
+has the dimensions of a charge. For this purpose, a QDC needs a gate signal to set the integration
+time. Typically, the gate is active during the integration time. The result of the current input
+integration is then converted in a digital format and readout through the data acquisition system.
+The most important aspects in designing QDC are sensitivity, noise, resolution (i.e., number of bits)
+and conversion time. A typical sensitivity for a QDC is less than a picoCoulomb per bit, with 12
+bits full-scale resolution or more. The conversion time can range from tenths of a nanosecond to
+milliseconds. Time to digital converters (TDC) measure the time elapsed between a start and a
+stop signal. This measurement is then converted in a digital format and read-out through the data
+acquisition system. Commercial TDCs can include many channels, they can be common start or
+common stop, i.e., all the channels can either start or stop upon arrival of a common signal. The
+most important parameters in designing TDC are sensitivity, accuracy, resolution (number of bits)
+and conversion time. A typical sensitivity of a TDC is tenths of a picosecond per bit. The
+conversion time can range from tenths of a nanosecond to milliseconds. The full range can be 12
+bits or more: it depends strongly on the conversion method.
+
+Rev. 2
+
+4
+
+3. DATA-ACQUISITION
+In the following data acquisition (DAQ) will be treated only by means of historical notes since the
+topic is too big and to be treated for the time being and a better explanation is left as future work.
+The only DAQ that will be explained more in details is the serial-chain, which has been used in the
+past for cosmic muon tracking. With DAQ we refer the hardware and software required for
+transferring data from the front-end to the host computer. This means that there is some hardware
+connected to the front-end at one side and to the host computer at the other side. In the “80s” there
+was the CAMAC, then the FASTBUS. The CAMAC is an electrical and mechanical standard: it
+specifies a crate hosting and powering the frontend cards, and the crate-controller. The
+crate-controller is connected to the host, usually a VAX (Digital Equipment). A CAMAC DAQ can
+transfer 24 bits in roughly one microsecond, using a non bidirectional TTL bus. The FASTBUS had
+shorter life, but it was a great enhancement in DAQ: it had an ECL bus and it could host very
+sophisticated crate controllers. The controllers were based on MC68000 CPUs and they were
+connected directly to disks. But the FASTBUS was too expensive and the more recent VME
+quickly took its place. The VME was born as military standard, it used bidirectional 32/64 bits TTL
+bus. A proprietary version was developed at CERN, which included some additional enhancements,
+and then other versions appeared on the market. Later on VXI, PCI, PXI, etc. were introduced that
+generated a lot of discussion about which was the best DAQ choice. The most recent approach is to
+connect the frontend to a host directly via Ethernet or LVDS. This is possible thanks to the advent
+of field programmable gate arrays (FPGA) that also embed very powerful hardware processors.
+Another great enhancement came with the Gigabit Ethernet that in the most recent versions (150
+GBit and more) allow very high transfer rates. This is becoming comparable or even faster then the
+old direct transfer rate to disks.
+
+Rev. 2
+
+5
+
+4. TRIGGER
+The trigger is the simplest method to suppress the useless data and noise. Triggering is also the first
+zero-suppression: when a significant interaction does happen the trigger circuit signals it to the
+front-end, which in response capture the event. The task must be accomplished as fast as possible,
+because of the difficulty that front-end electronics, often only analogue, have in taking memory of
+the input signal. For example, when a QDC is used, a gate signal must be issued shortly after the
+beginning of an event, in order to loose as few charge as possible during the integration. Therefore,
+the trigger circuit must be fast enough to ensure a prompt capture. Triggering in high-energy
+physics is very similar to what happens into an oscilloscope working in normal trigger mode: when
+the input signal crosses the threshold, a trigger starts the horizontal sweep, resulting in a coherent
+display of the input signal. In an analogue oscilloscope, a delay-line ensures proper timing between
+the trigger and the input signal. In modern experiments, when the event-rate is very high, there are
+more trigger levels. Each trigger level performs a suppression of non relevant events and arms the
+following trigger levels. Building a trigger logic is a very difficult task, it is more an art. For better
+understanding what is a trigger system let’s start from a simple example. Consider two detectors.
+Consider also that we want to count only coincident outputs, i.e., those coming from interactions
+that happen simultaneously in both detectors. The detectors could be, for example, two
+photomultiplier tubes (PMT) or Silicon Photo Mutipliers (SiPM), i.e., two light detectors
+illuminated by two scintillators, as in figure 4.1. The scintillator converts incident ionization
+radiation in photons. This is a typical test-set for the characterization of a third one: the scintillator
+is introduced between the other two and the relevant count-rate and efficiency can be measured.
+LIGHT
+SCINTILLATOR
+
+DISCRIMINATOR
+
+DETECTOR
+
+DEVICE TO TEST
+
+TO COUNTER
+LIGHT
+SCINTILLATOR
+
+DISCRIMINATOR
+
+DETECTOR
+
+TRIGGER
+
+Fig. 4.1 – Simple trigger example
+In figure 4.1 two equal channels process the signals from the detectors and the discriminators when
+the light hits. The very simple trigger circuit is an AND port whose output is active when both the
+inputs are active. This is a called coincidence circuit, it can accept double coincident events and
+reject single ones. A double event is often caused by a particle hitting both the scintillators, but
+there are other cases too: for example, there is a little probability that two particles hit
+independently the two scintillators at same time. Although this event is very rare, it can occur and
+must be accounted for. Starting from this very simple application, if we increase the number and
+complexity of the detectors involved in the experiment, the trigger complexity increases too. A
+muon telescope uses several floors of detectors, stacked on different levels, as is shown in figure
+4.2. These detectors can be streamer tubes, resistive plate counters, scintillators and similar cheap
+detectors or, more recently, SiPMs. A muon crossing the telescope hat hits some levels can be
+tracked. The muon trajectory can be then reconstructed from the hits positions. The muon telescope
+generally includes a tracking system, that displays the muon tracks by showing the hits and it is
+described in section 12.
+
+Rev. 2
+
+6
+
+1
+LEVEL 7 DETECTOR
+LEVEL 6 DETECTOR
+LEVEL 5 DETECTOR
+LEVEL 4 DETECTOR
+LEVEL 3 DETECTOR
+LEVEL 2 DETECTOR
+LEVEL 1 DETECTOR
+LEVEL 0 DETECTOR
+
+DISCRIMINATOR
+
+1
+
+DISCRIMINATOR
+
+1
+
+DISCRIMINATOR
+
+1
+
+DISCRIMINATOR
+
+1
+
+DISCRIMINATOR
+
+1
+
+DISCRIMINATOR
+
+1
+
+DISCRIMINATOR
+
+1
+
+TRIGGER OUT
+
+DISCRIMINATOR
+
+Fig. 4.2 – Muon telescope trigger
+The trigger circuit depicted in figure 4.3 is a bigger version of the one in figure 4.1, it looks for
+coincidences among multiple detector levels by using again an AND port. Detector level n is
+considered by the trigger when the corresponding switch is turned on. When it is not used, the
+corresponding input to the AND port is connected to an always active level. The trigger circuits we
+have seen so far are simple combinatorial networks, but there are cases where more complex
+combinatorial networks are used as it is the case of the majority circuit. The majority circuit has K
+inputs. It outputs a signal when the number of active inputs is greater then a fixed N, with N ≤ K.
+There are two ways for making a majority circuit: digital and analogue. The digital one is a logic
+network that can be designed using traditional digital design methods as the Karnaugh map.
+Combinatorial solutions are often better than synchronous due to their simplicity and speed. A
+majority circuit (K=4, N=3) is showed in re 4.3.
+INPUT #0
+
+0,1,2
+
+INPUT #1
+
+1,2,3
+
+INPUT #2
+
+0,2,3
+
+INPUT #3
+
+0,1,3
+
+OUTPUT
+
+Fig. 4.3 – Combinatorial majority (K=4, N=3)
+The network seems simple: four AND ports and one OR port. But this is only because K and N are
+small numbers. Increasing K and N the number the number of AND ports increases as the
+combinations CN,K, defined as:
+N!
+C N,K =
+K!(N − K)!
+Therefore, increasing K and N, could make the number of required AND ports too big for a
+practical implementation. For example a majority K=10, N=6 requires 210 AND ports: even using a
+FPGA the construction of this circuit can be quite tedious and complex. Moreover, it has noflexibility in changing N. Another way to build the digital majority network is using a random
+access memory (RAM). The RAM is used as a look-up-table and this circuit was called magic-box.
+In the past the magic-boxes used fast ECL RAMs. They where more flexible then the above
+Rev. 2
+
+7
+
+solutions and allowed to implement programmable coincidences, anti-coincidences or majority
+circuits. A schematic of the magic-box is depicted in figure 4.4.
+INPUT #0
+INPUT #1
+FAST RAM
+
+INPUT #2
+ADDRESS
+
+DATA
+
+OUTPUT
+
+INPUT #
+INPUT #
+INPUT #K
+
+Fig. 4.4 – Magic-box schematic
+For the sake of clarity, the programming logic is not shown in the figure. Programming logic stores
+the data into the addressed RAM cells. The input signals compose the address of the memory. In
+return, the magic-box outputs the stored value. Addresses corresponding to valid trigger
+combinations output ones, all the others outputs zeros. In this way all the required combinations of
+inputs for trigger can be done by pre-computing and storing the RAM content. The analogue
+majority is the analogue version of the circuit. It uses current generators whose output is added on a
+resistor. Each active input turns on a current generator, so the resulting added current is proportional
+to the number of active inputs. The voltage across the resistor load is proportional to the number of
+active inputs and it can be estimated using a voltage comparator. The block diagram of an analogue
+majority is depicted in figure 4.5. Each input connects one current generator to the summing resistor
+Rs. When the voltage on Rs is greater then Vthreshold the comparator output becomes active.
+
+Ic
+
+Ic
+
+Ic
+
+Ic
+
+Ic
+
+Ic
+
+INPUT #0
+INPUT #1
+INPUT #2
+INPUT #
+INPUT #
+INPUT #K
+
+OUTPUT
+Rs
+
+Vthreshold
+
+Fig. 4.5 – Analogue majority block diagram
+For a majority of more than N active inputs, Vthreshold must be:
+N∙Rs∙Ic < Vthreshold < (N+1)∙Rs∙Ic
+Each active input increases the voltage on Rs of the quantity Rs ∙Ic. When N inputs are active, the
+voltage on Rs results N∙Rs∙Ic. When N+1 inputs are active, the result is (N+1)∙Rs∙Ic. Vthreshold
+Rev. 2
+
+8
+
+must be set between these two values. Note that the figure 4.5 shows a simplified block diagram. A
+real circuit can be done using long-tails driven by Positive Emitter Couple Logic (PECL) logics. A
+long-tail is a pair of bipolar transistor used in linear circuits, e.g., as the input stage of an operational
+amplifier. It can also act as a very fast current generator including switch, provided that its design
+avoids saturation. Indeed, the PECL logic is very fast because it is designed avoiding saturation. A
+more realistic example of analogue majority is in the figure 4.6.
+Vcc
+
+INPUT #0
+
+Vcc
+
+Vcc
+
+PECL
+
+INPUT #1
+
+INPUT #2
+
+PECL
+
+PECL
+
+OUTPUT
+Vthreshold
+
+Fig. 4.6 – Example of analogue majority
+With use of PECL drivers and long-tails, the circuit can have a arbitrary number of inputs. To avoid
+saturation, the current flowing in the long-tails must be chosen properly. The voltage threshold
+range will change consequently. The required number of active channels N can be set using a
+variable resistor for setting Vthreshold. The pulses can be very fast, with short rise-time and falltime. When these times are comparable with the propagation time along the signal paths the simple
+lumped parameter model cannot be used anymore. Transmission-line theory must be used insead
+and the designer must implement proper impedance matching in order to avoid reflections. The last
+circuit mentioned in this section is the mean-timer. Although mean-timers are now used in other
+fields they are an interesting application example of current switches. The mean-timer is used to
+obtain the mean arrival time in a pair of photo-detectors illuminated by the same scintillator. It is
+used to calculate the point of incidence of a particle on a scintillators, since its output is proportional
+to the mean arrival time between the two input pulses. The scintillator is a rectangular section bar
+with light collectors at both the far ends. The setup is shown in figure 4.7. As shown in the figure,
+an incoming particle hits the scintillators, then the scintillators light reaches the two extremities
+after T1 and T2, respectively. The mean-timer measures the mean between times T1 and T2 and its
+output gives an estimation of the hit position x.
+
+x
+T1
+
+DISCRIMINATOR
+
+LIGTH
+DETECTOR
+
+T2
+
+LIGTH
+DETECTOR
+
+SCINTILLATOR
+
+A INPUT
+
+MEAN-TIMER
+
+B INPUT
+
+Fig. 4.7 – Pair of PMTs lighted by the same scintillator
+Rev. 2
+
+9
+
+DISCRIMINATOR
+
+The simplified mean-timer circuit is shown in the figure 4.8. The waveforms of the involved signals
+are shown in figure 4.9.
+
+Ic
+
+A INPUT
+
+SET
+
+Ic
+
+Q
+
+Vthreshold
+
+SR-FF
+RESET
+
+/Q
+
+SET
+
+Q
+
+OUTPUT
+B INPUT
+
+SR-FF
+RESET
+
+C
+/Q
+
+Fig. 4.8 – Simplified mean-timer circuit
+In figure 4.8 more events are depicted. The circuit work using a capacitor as current integrator. It
+integrates two equal currents, each switched on by the input signals. The voltage across the
+capacitor is a ramp:
+
+Vc =
+
+Q Ic ⋅ t
+=
+C
+C
+
+The Ic value doubles when both inputs become active since, i.e., the ramp slope changes. The total
+time required by the ramp to cross a fixed threshold depends linearly from the mean arrival time.
+Vc
+
+Vc
+Vthreshold
+
+Vc
+Vthreshold
+
+Vthreshold
+
+Reset
+
+Reset
+
+t
+T1
+
+T2=Tm
+
+Reset
+
+t
+T1
+
+Waveform A
+
+T2
+
+Tm
+
+t
+T1=T2
+
+Waveform B
+
+Tm
+Waveform C
+
+Fig. 4.9 – Voltage waveforms of mean-timer circuit
+Let’s call k the slope corresponding to the current of one generator:
+
+k =
+
+dVc Ic
+=
+dt
+C
+
+Let’s consider the time Ttot required to Vc for crossing Vthreshold when a single current generator
+is on. This is shown in the Waveform A in figure 4.9. This time must be set equal to the time
+required from the light for crossing the whole scintillator length. This is Ttot = T1 + T2. So
+Vthreshold can be defined as Vthreshold = k ∙ Ttot = k ∙ (T1 + T2). The voltage on the capacitor can
+be also defined as Vc = k ∙ (T2 – T1) + 2 ∙ k ∙ (Tm – T). Tm can be derived equating Vthreshold to
+Vc as in the following:
+Rev. 2
+
+10
+
+Vc = k ⋅ (T2 − T1) + 2 ⋅ k ⋅ (Tm − T2) = Vthreshold = k ⋅ Tot = k ⋅ (T1+ T2)
+
+So k ⋅ (T2 − T1) + 2 ⋅ k ⋅ (Tm − T2) = k ⋅ (T1+ T2) . The final result is Tm = T1 + T2 . The mean
+arrival time is Tm/2 so the circuit outputs a pulse after double the mean arrival time. Connecting an
+output of the light detectors to a TDC’s start signal, and the mean-timer output to its stop, the
+resulting counts are proportional to the x coordinate of the incoming particle. In waveform A of
+figure 4.9 is the case of particle hitting close to an extremity of the scintillator, in waveform B the
+particle hits an intermediate position, and in waveform C the hit is exactly in the center.
+Superimposing the three waveforms in figure 4.10, and letting the left end the start signal, the x
+position can be calculated from the output.
+Vc
+Vthreshold
+
+t
+T1=START
+C
+
+B
+
+A
+STOP
+
+Fig. 4.10 – Relations between x position and mean-timer output
+If the particle is in the left, the TDC counts the time of the waveform A. If it is in the first third from
+left, the time is in the waveform B. Particles in the middle correspond to waveform C. At two thirds
+it is again B. At the right end it is again A. There is an ambiguity in the right or left position respect
+the centre of the scintillator but it can be solved by sampling with the start signal the status of the
+other input, as depicted in figure 4.11.
+B INPUT
+D
+
+D-FF
+
+Q
+
+OUTPUT
+
+CLOCK
+
+A INPUT
+TDC START
+
+Fig. 4.11 – Solving right/left ambiguity
+If input B arrives before A, the output is active, therefore the particle is in the right side of the
+detector. If A arrives before B, the output is not active. The realization of the above circuit has some
+troubles: stability of currents, precision of threshold and so on. The practical current switch showed
+for analogue majority can be successfully used here. Today, analogue mean-timers are not used
+any-more, since the cost of TDCs has become very low and they allow to calculate the x coordinate
+digitally: the two detector outputs are connected to two start inputs of a TDC and the stop signal is
+achieved with a delayed coincidence of the inputs.
+
+Rev. 2
+
+11
+
+5. VOLTAGE AMPLIFIERS
+These circuits are used for signal amplification. It seems to be a simple task but it involves a lot of
+different requirements that can require different solutions. The main requirements of an amplifier
+can be many: input and output impedance, gain, bandwidth, noise, output power and so on.
+Moreover, an amplifier should drive an output load so the circuit must be designed with a proper
+output voltage range. Designing an amplifier is not straightforward, it strongly depends on the target
+application. The first choice to take is to use discrete components or integrated circuits. Discrete
+components are required when the circuit has a structure that cannot be found in integrated
+amplifiers. This is the case of low-noise designs where a non symmetrical structure is required or
+with very fast amplifiers when the available op-amps are not fast enough. Modern integrated opamps can solve almost any problems but their choice is critical. This paper cannot cover all the
+amplifier-related topics. However, a sort of selection tree by parameters is shown below to help
+selecting the right one given a target application.
+Bandwidth
+High bandwidth (hundreds of MHz) can be achieved by using current-feedback op-amps. These
+amplifiers don’t work as the voltage-feedback amplifiers, that are usually studied in basic electronic
+courses. Current-feedback op-amps don’t follow the constant gain-bandwidth product (GBW) rule,
+they are designed for an optimal feedback resistor: the one connected between inverting input and
+output. The value of the optimal feedback resistor is clearly specified in the data-sheets. Using a
+different value could result in oscillations or bandwidth degradation. The gain of the circuit is
+adjusted setting the value of another resistor in the feedback network. Therefore, the feedback
+resistor cannot be replaced by a capacitor. For this reason a current-feedback integrator can be
+achieved only with particular configurations (e.g., De Boo). Although current-feedback amplifiers
+have these limitations, they are often used in active filters. Their noise performances are eceptionlly
+good. The current-feedback configuration can be generally built only using bipolar transistors and
+the fastest devices cannot be powered with relatively high voltages. The fastest amplifiers, that are
+used in other fields as radio-frequency, are made with discrete devices. Speaking about highbandwidth amplifiers, it’s worth mentioning composite amplifiers. These are designed with a dual
+path for the signal: one for the low frequencies and the DC, the other for the high frequencies. This
+is done with two different amplifiers optimized each for the proper task. This is an old technique
+used, e.g., in the vertical channels of some oscilloscopes.
+High input impedance
+MOSFET or JFET input stages must be used when a high input impedance is required. When the
+whole amplifier is not designed using discrete components, a MOSFET or a JFET input op-am can
+be used. These amplifiers generally don’t have large bandwidth and they are available only in
+voltage-feedback configurations.
+Gain
+Current-feedback amplifiers, due to their constraints on feedback resistor, work properly in a small
+range of gain. If more gain is required, they must be cascaded. A voltage-gain amplifier can be
+more flexible and its bandwidth can be easy shaped. In the discrete components field there are
+Darlington, high-hfe and now also SiGe transistors. These are intrinsically high-gain devices and
+can be used for high-gain amplifiers design.
+
+Rev. 2
+
+12
+
+Noise
+Noise is the biggest problem in the design of amplifiers for high energy physics. There are many
+techniques for noise reduction, these were specially developed in charge preamplifiers design. The
+main rule is the ones used in the noise-figure calculation: the noise performance of a circuit depends
+on the noise and the gain of the first stage. So this must be designed with maximum gain and
+minimum noise with a proper choice of the first amplifier device. Moreover the noise performance
+of an amplifier depends on the source and the input impedances. In audio amplifier for example
+there are special for optimum signal-to-noise ratio: the less noisy source must have impedance
+given from the voltage noise and current noise ratio. This results in using proper transformers. Also,
+in radio-frequency amplifiers the best noise-figure ratio is searched and in this field also a proper
+impedance matching is needed. Another noise reduction technique is in distributed amplifier:
+adding signals it is a linear addition, adding noise it is a quadratic addition in squared RMS voltage.
+This results in a square radix improvement of the resulting signal to noise ratio. This results also in
+the use of asymmetrical (i.e., not differential) amplifiers in low-noise amplifier when the source is
+single-ended. This is the case of the majority of the detectors. A good DC coupled amplifier can be
+a composite one. A good choice is a very fast low-noise device in the high-frequency path and a
+precision low-noise amplifier in the low-frequency path. The cut-off frequency must be set in
+compliance with the 1/f noise corner of the high-frequency amplifier. Many fast devices have lownoise performance only over the frequencies when the 1/f noise become flat: over the 1/f corner.
+More about the 1/f corner can be found in the basic electronics book, anyway something more will
+be explained in the following.
+Example of simple DC coupled amplifier
+In the following, a generic example of a DC coupled amplifier is presented, which is based on
+AD8009 integrated current-feedback devices. The schematic is in the figure 5.1, all resistor values
+are in Ohm.
+Rs
+22.2
+
+Rf
+200
+
+OUTPUT
+INPUT
+Rt
+50
+
+Fig. 5.1 – Example of 10X gain DC coupled integrated amplifier
+The proper resistor feedback Rs for a 10X fixed gain must be set following the device datasheet. As
+stated above, current-feedback op-amps don’t follow the current-feedback GBW rule, so each one
+has a proper resistor feedback for the desired gain. AD8009 has Rf = 200 Ω. Also in this kind of
+amplifiers the Rs resistor follows the usual rule:
+Gain = 1 +
+
+Rf
+Rs
+
+So if Gain = 10 then Rf = 22.2 Ω. It seems simple but there are a few pitfalls hidden in the circuits
+that require some tricks. The first is how to connect a coaxial cable to the output. The output
+impedance is near 0 Ω therefore there is a mismatch in the amplifier at the end of the line. This
+Rev. 2
+
+13
+
+would result in multiple backward reflections. Moreover, a fast amplifier is often unstable with such
+a load. A workaround is to put an output resistor connected to the op-amp output as in figure 5.2.
+Rs
+22.2
+
+Rf
+200
+Ro
+50
+
+OUTPUT
+Vload
+
+INPUT
+Rt
+50
+
+Rt
+50
+
+Fig. 5.2 – Output matching
+Again it seems a simple solution but the gain, measured at Vload, now becomes 5X, i.e., the load
+voltage range is halved. Therefore we need to add a new amplifier stage, with gain 2X and a
+following resistor Ro for proper output line matching. The load voltage range is always half the
+original one but the gain is 10X again. There is another hidden problem: the two stages of the
+circuit have good probability to oscillate. Therefore an additional Ri must be inserted as shown in
+figure 5.3 to avoid oscillation. Also don’t forget to bypass the op-amp power supplies, which re not
+shown in the figure 5.3.
+Rs
+22.2
+
+Rf
+200
+Ri
+33
+
+Ro
+50
+
+AD8009
+INPUT
+
+AD8009
+
+OUTPUT
+
+Rt
+50
+Rs
+300
+
+Rf
+300
+
+Fig. 5.3 – Final drawing of an example of 10 X fast amplifier
+Some notes about the circuit in figure 5.3:
+•
+•
+•
+•
+•
+
+the two stages have different gains, the first is 10 X, the second is 2 X, according to the rule
+of the maximum gain first;
+the final gain results 10 X because it is halved by the matching resistor Ro;
+the dynamic range of the output is halved as well by Ro;
+the resistor values of the two stages are different, according with the recommended values in
+the data-sheet;
+the resistor Ri prevents instability and oscillations, in the following there is a little
+explanation of this.
+
+This amplifier circuit is a little example that can be recycled in many applications. The bandwidth
+of the circuit depends on the first stage bandwidth and the noise. Due to the use of current-feedback
+amplifiers, the thermal stability and the total output offset voltage could be significant. This can be
+recovered using the circuit in figure 5.4.
+
+Rev. 2
+
+14
+
+Rs
+22.2
+
+Rf
+200
+Ri
+33
+
+Ro
+50
+
+AD8009
+INPUT
+
+AD8009
+
+OUTPUT
+
+Rt
+50
+Rs
+300
+
+Rf
+300
+
+OFFSET
+RECOVER
+NETWORK
+V-
+
+V+
+
+Fig. 5.4 – Example of 10X fast amplifier with offset recovery
+The resistor used for offset recovery must be large enough to have not influence on the gain value.
+Special attention must be paid to noise, since it could be introduced from ripple on +Vs and –Vs. A
+little more about Ri: when an emitter-follower with a fast bipolar transistor is done, it can oscillate,
+especially at high collector currents. This is an argument treated in some basic books, e.g., as in
+“Microelectronics” edited by Millman-Halkias. Some fast bipolar transistors, when increasing the
+collector current, tend to have a negative base resistance. This results in oscillation as in a RLC
+circuit with negative R values. These oscillators are often used in microwaves, for example. In order
+to avoid the oscillations, a little resistor (e.g., 27÷33 Ω or slightly higher) is placed in series with the
+base of the transistor and oscillations stop. Due to the little resistor value, the bandwidth is
+practically unaffected. In the same way this can happen in the output stage of a fast op-amp. The
+little resistor Ri can “mask” the following load to the potentially unstable circuit thus avoiding
+oscillations. This is the case described in the following. Oscillations can be often observed using a
+scope probe on a fast amplifier output pin. The oscillations stops if a little 33 Ω resistor is inserted
+in series with the probe tip. Due to the high impedance of the probe, the bandwidth will be
+considerably reduced, but anyway some signals can be observed. This is obviusly not the proper use
+of a scope probe but it can be an emergency solution. The best way is to use an active probe with
+very short ground connection.
+Example of composite amplifier
+National Semiconductor’s OA-07 application note is a great source of practical circuits based on
+current-feedback op-amp. The circuit in the figure 5.5, taken from there, is a non-inverting
+composed amplifier. The CLC401 is no longer available, but the circuit can be recalculated for
+newer devices, that must be generally powered with lower voltages. For example, the AD8009 in
+the previous example accepts ±5 V maximum. Also the OP-27 also should be replaced by a newer
+precision rail-to-rail op-amp since it is not suitable for ±5 V supply. A good choice could be the
+Analog Devices AD8638. I want to precise that every designer uses the components best known
+from him, and for this reason I used many times the AD8009. There are many other devices sourced
+from other manufacturers, I don’t receive sponsorship from Analog Devices!
+
+Rev. 2
+
+15
+
+Fig. 5.5 – Original composite amplifier in National Semiconductor OA-07
+Fully-differential amplifiers
+Increasing the speed of the op-amps reduced their voltage supply range. This is because faster
+technologies are obtained by reducing the dimensions of the integrated circuits. This is particularly
+true for the modern fastest analogue-to-digital converters (ADC). The higher the resolution (i.e., the
+number of bits) the stricter is the requirement on signal-to-noise ratio. For this reason modern ADCs
+are designed with true differential input stages. Using differential signals is an example of doubling
+signal and noise, which results in a 2X signal and 2 X noise, i.e., in an improvement of 2 X on
+the signal-to-noise ratio. Fully-differential amplifiers are available for driving properly these ADCs.
+These are designed with great bandwidth and low noise and there are a lot of literature available
+about TI website.
+Design of an amplifier
+As stated above, there are no general rules in amplifier design, each design is a world where the
+requirements must be weighted and all the relevant considerations must drive the designer’s
+choices. The first choice is about using integrated or discrete components: if proper integrated opamps are available, this is the best choice. Conversely if there are particular requirements, e.g.,
+regarding noise or speed, a discrete component amplifier can be designed. This task requires a little
+experience. The job must start from the selection of the circuit’s architecture, then the bias point
+calculations and finally it must end with the noise and speed performance analysis. A good
+simulator can be useful but a good designer must always have a feeling of what the voltages and
+currents do inside the circuit. Simulation is a task that requires experience since a good simulator
+can also give some weird results if it is not carefully setup. Start your design with some well-known
+amplifier typologies and check if the simulation results agree with the theory, then go ahead.
+
+Rev. 2
+
+16
+
+6. DISCRIMINATORS
+Discriminators are used to state if a searched signal is present in the noise. This is done using an
+electronic comparator. This is the first analogue-to-digital converter: the one-bit converter. The
+output state of a comparator is true when the voltage at its positive input is greater than the voltage
+at its negative input. If it is lower instead, the output state of the comparator is false. In this paper it
+is assumed that the reader is familiar with electronic comparators, which are described in any basic
+electronics book. The input signal is connected to one of the comparator inputs, a fixed voltage to
+the other. The latter is called threshold. Generally the comparator is followed by a one-shot circuit
+that can be retriggerable or unretriggerable the former is named updating, the latter not-updating.
+The main characteristics of a discriminator are:
+•
+•
+•
+•
+•
+•
+
+sensitivity: the lowest signal that causes an output;
+speed: the highest operating frequency of the circuit;
+delay-time between input and output;
+jitter: the time fluctuation in the threshold crossing;
+dual-pulse resolution: the minimum time between two input signals that can produce two
+separate output pulses;
+hysteresis: optional circuit useful for rejecting spurious oscillations due to noise.
+
+Discriminators can be designed in ways that optimise one or more characteristic above, as speed or
+jitter. If the output pulse width must be the time-over-threshold plus a fixed time, the discriminator
+is said to be updating otherwise it is said to be not-updating, i.e., the output pulse width is fixed.
+Leading-edge discriminators
+This is the simplest discriminator circuit, it is depicted in figure 6.1.
+
+1
+Updating
+
+INPUT
+
+OUTPUT
+RETRIGGERABLE
+ONE-SHOT
+
+Rt
+Postive edge
+Hysteresis
+Negative edge
+V+
+Threshold
+
+V-
+
+Fig. 6.1 – Leading-edge discriminator
+The circuit can work for positive or negative input pulses. The hysteresis can be inserted by closing
+the corresponding switch. If hysteresis is on, the output is feed back to the input with the same
+polarity, thus enhancing the threshold crossing and obtaining the typical memory effect. The oneshot becomes not-updating when the output inhibits the start signal. The main problem of the
+Rev. 2
+
+17
+
+leading-edge discriminator is its low timing precision. This is due to the jitter caused by the
+fluctuations of the input signal amplitude, as illustrated in figure 6.2.
+Input
+signal
+
+Treshold
+t
+Jitter
+
+Fig. 6.2 – Jitter in leading-edge discriminator
+The jitter of the leading-edge discriminators can be reduced using two other techniques: the doublethreshold and the constant-fraction discriminators. The simplest to use is the dual-threshold.
+Double-threshold discriminators
+Double-threshold discriminators reduce the jitter using a low-threshold for accurate timing and an
+high-threshold for validating the arrival time. A simplified scheme of the double-threshold circuit is
+illustrated in figure 6.3.
+INPUT
+Rt
+V+
+High
+Threshold
+
+OUTPUT
+ONE-SHOT
+
+DELAY
+V+
+Low
+Threshold
+
+Fig. 6.3 – Double-threshold discriminator
+The circuit in figure 6.3 is a simplistic version that allows to discriminate only positive input
+signals. The circuits for setting polarity, hysteresis and updating are not shown, but they can be
+implemented in the same way as for the leading-edge discriminator. The double-threshold
+discriminator works by capturing the time with the low threshold level. This results in reducing
+jitter due to input signal amplitude fluctuations. In figure 6.4 it is shown as a double-threshold
+discriminator works.
+
+Rev. 2
+
+18
+
+Input
+signal
+
+High treshold
+
+Low treshold
+t
+Jitter
+Delay
+
+Fig. 6.4 – How the double-threshold discriminator works
+The output timing is the low-threshold crossing time delayed by the fixed value “delay” in the
+figure 6.3. The time from the beginning of the input pulse and the low threshold crossing is
+proportionally reduced so the jitter due to input signal amplitude fluctuations is strongly reduced
+too. The lower is the low-threshold value, lower is the jitter but the low-threshold cannot be too
+close to zero Volts because of noise. But the main job of a discriminator is to state if a signal
+crosses or not a fixed threshold, i.e., the high-threshold. This is done by using the high-threshold
+comparator. However this occurs at a later time than the low-threshold crossing. For this reason a
+delay line is required: the low-threshold crossing is delayed so the coincidence between the two
+signals can take place and the output timing is the time at which this coincidence occurs. The
+double-threshold discriminator is easy to adjust and use, it can reduce the output jitter but for this
+issue the best choice is the constant-fraction discriminator, when usable.
+Constant-fraction discriminators (CFD)
+These circuits were initially proposed to improve timing evaluation using PMTs. There are some
+historical papers describing the circuit. In FDS the input signal is combined with a delayed replica
+of itself. The resulting signal has a zero-crossing time that does not depend theoretically from the
+input signal amplitude. As for double-threshold discriminators there is a high threshold, called the
+arming threshold, and an adjusting zero-crossing threshold, called the walk adjust. The schematic of
+the CFD is depicted in figure 6.5.
+
+Rev. 2
+
+19
+
+INPUT
+Rt
+V+
+Arming
+Threshold
+
+OUTPUT
+ONE-SHOT
+
+DELAY T
+DELAY O
+V+
+Walk adjust
+
+ATTENUATOR
+
+Fig. 6.5 – Constant-fraction discriminator
+In figure 6.5 the schematic is again very simplified, it is depicted only for positive input signals.
+The circuit for setting polarity is not shown but it can be implemented as for the leading-edge
+discriminator. Hysteresis and updating are generally not used. The constant-fraction discriminator
+works by capturing the time at the zero-crossing. This happens when the signal at positive input of
+walk comparator equals the signal at negative input. If the attenuator reduces of α the input signal,
+and the delay-line delays it of ΔT, the inputs of the walk comparator are:
+Vwalk+ (t) = Vin(t-ΔT)
+
+and
+
+Vwalk-(t) = α∙Vin(t)
+
+So the walk rigger occurs when Vwalk+ (t) = Vwalk-(t), i.e., at the tme tw when Vin(tw-ΔT) =
+α∙Vin(tw). It can be seen by inspection that changing the amplitude of Vin the t w does not changes.
+The zero-crossing graphical evaluation is depicted in figure 6.6. In the figure, the delay is ΔT and α
+= 0.5. The arming threshold crossing can occur at any time along the rising edge of the input signal.
+The delay-line at the walk comparator output is used for proper time compensation of the zerocrossing delay. Using this device, the zero-crossing time is always delayed after the arming
+crossing. Therefore in the constant-fraction discriminator, the output time is the zero-crossing time
+plus a fixed time. As stated above, tw is unaffected by the input signal amplitude, but this is true
+only if it maintains the same shape when the amplitude changes. This is true when the amplitude
+changes within a reasonably small range, it is for example with PMTs. In this hypothesis, the jitter
+would be theoretically zero if it were not for the noise. In this circuit, the jitter comes from the noise
+and from the input offset voltage of the walk comparator. In order to reduce the offset error at the
+zero threshold, the walk adjust is included.
+
+Rev. 2
+
+20
+
+Input
+signal
+
+t
+Walk comparator
+input signals
+Zero-crossing
+Walk+ is delayed of
+Walk- is Vin attenuated 0.5
+
+t
+
+Fig. 6.6 – Graphical zero-crossing evaluation
+As stated above, the delay to be used in walk must be set depending upon the input signal rise-time.
+For this reason a typical CFD has external delay-line connections or internal jumper setting for walk
+delay. Typical values of α are 0.3 and generally this is a fixed value. Typical settings are for zerocrossing at 30% of the input signal rise-time. The resulting final jitter can be easily less than 100 ps.
+Note that reducing α reduces also the zero-crossing signal. This is a practical limitation to its value.
+The same consideration is valid for the walk delay. The reader may want to evaluate by himself the
+best setup for obtaining a zero-crossing with maximum rise-time and amplitude. That setup will be
+the best operating condition for a practical comparator device and will result in the best jitter
+performances. Double-threshold and constant-fraction discriminators have very similar
+performances. The double-threshold is easiest to use since it does not require delay adjust but its
+output jitter will depend from the input signal rise-time.
+Other constant-fraction discriminators
+In the literature there are other ways to evaluate a zero-crossing time independent from the input
+signal amplitude. All of these use the time tw resulting from an equation in the form of:
+f1(Vin(tw)) = f2(Vin(tw))
+If f1 and f2 are linear with the amplitude Vin, the time tw is again indipendent from it. For example,
+the functions f1(Vin(t)) = Vi(t) and f2(Vin(t)) = α∙∫Vi(t)∙dt can drive the two walk comparator inputs,
+in this case a constant-fraction-like discriminator is obtained. The choice of f1 and f2 depends on the
+designer fantasy.
+Single-channel analyzer
+A single-channel analyzer (SCA) can be thought as a combination of two leading edge
+discriminators. This circuit is used in spectroscopy for counting the incident particles with a
+selected energy in a detector. The typical spectroscopic chain output is a pulse whose height is
+proportional the energy released in the detector by the incident radiation. The SCA is done using a
+Rev. 2
+
+21
+
+pair of leading-edge discriminators, one with the threshold set for minimum energy level to count,
+the other for maximum. Only the pulses whose amplitude is between the two thresholds are output
+by the SCA to be counted in the following stage, thus resulting in the counting of events of energy
+in the selected range. A simplified schematic of the SCA is illustrated in figure 6.7.
+INPUT
+Rt
+V+
+High energy
+Threshold
+
+OUTPUT
+ONE-SHOT
+
+DELAY
+V+
+Low energy
+Threshold
+
+Fig. 6.7 – Single channel analyzer
+Only the input pulses that are under the upper energy threshold after the delay cause the one-shot
+output. Today modern spectroscopy analyzers have almost totally replaced these old circuits.
+However in a designer’s life it can be useful to know and to be able to recycle some forgotten good
+ideas.
+
+Rev. 2
+
+22
+
+7. CHARGE PREAMPLIFIERS
+Charge-preamplifiers integrate the detector output current. Charge-preamplifiers output signal is a
+kind of mathematical integration of the input. The circuit is used for detectors with very low output
+signals, specially when the signal to noise ratio is low as in drift chambers or in spectroscopy
+detectors. When the signal voltage is high, as in PMTs output, there are different ways to process
+detector output charge. Charge-preamplifier operations is the figure 7.1.
+Cf
+INPUT
+
+Rf
+
+Idet
+OUTPUT (Vu)
+
+Fig. 7.1 – Charge-preamplifier operations
+It is simple to see that the output is an indefinite integral also called antiderivative of the input
+current. The transfer-function of the circuit, in terms of Laplace transform, results:
+Vu
+Rf
+(s) =
+Idet
+Rf ⋅ Cf ⋅ s + 1
+
+The input and output waveforms, the detector output current and the output voltage of chargepeamplifier are in figure 7.2.
+Idet
+Tdet
+
+Vu
+
+Fig. 7.2 – Charge-preamplifier waveforms
+The output ramps up when Idet is on (i.e., Tdet), then decays to the initial quiescent value. Decay
+time-constant is Tf = Rf ∙ Cf. If Tdet is very small than Tf, there is a negligible discharge and the so
+called ballistic error is negligible. The output voltage is:
+Vu ≈
+
+Idet ⋅ Tdet Qdet
+=
+Cf
+Cf
+
+S stated above the charge-preamplifier is a current integrator. Sensitivity of the circuit equals the
+reciprocal of feedback capacitor. Rf and Cf values are constrained by two requirements:
+•
+•
+Rev. 2
+
+high sensitivity needs low Cf value;
+long Tf requires high value of Rf ∙ Cf, but Cf must be small then Rf must be high.
+23
+
+The input bias current of the op-amp goes through Rf then the output quiescent value can result out
+of op-amp output voltage range, causing saturation. Real op-amp open-loop gain and dominant pole
+frequency can result inadequate to approximate the op-amp ideal behaviour. A suitable op-amp
+must have low input bias current, high GBW product and low noise: the choice could be only a
+modern high performance JFET input device. This dramatically cuts the number of suitable opamps. For these reasons and for noise, the typical charge preamplifier are done using discrete
+components. Proceeding in the analysis the equivalent circuit of the op-amp must be considered, as
+shown in figure 7.3. This allows a simple and more accurate calculation of the real performances.
+Following the considerations about the input bias current, the input impedance of the op-amp is
+supposed infinite. This allows also a simpler analysis of the circuit. A real op-amp in the circuit can
+behaviour quite different due to finite input impedance, to finite input capacitance and to the
+possible other time-constants. These could be not far enough from the principal time constants used
+in the analysis.
+Cf
+
+Rf
+Idet
+
+OUTPUT (Vu)
+
+Vi
+
+Av(s) Vi
+
+Fig. 7.3 – Op-amp simplified model in a charge preamplifier
+Evaluating the circuit transfer-function:
+Vu
+Av(s)
+Rf
+(s) =
+⋅
+Idet
+Av(s) +1 Rf ⋅ Cf ⋅ s + 1
+
+By inspection this behaviours as the ideal only when Av(s) >> 1. For a common charge preamplifier
+sensitivity can be 1 mV/pC and Tf = Rf ∙ Cf can be 100 μs then Rf and Cf must be:
+•
+•
+
+Cf = 1 pF;
+Rf = 100 MΩ.
+
+For an high performance unity-gain stable op-amp Av(s) is supposed to be:
+Av(s) =
+
+Av 0
+1+ tA ⋅ s
+
+where
+
+tA =
+
+1
+2 ⋅  ⋅ fp
+
+Unity-gain stability requires only a pole in Av(s). Optimistically Av0 ≈ 105 and fp ≈ 50 Hz.
+Consider a high performance JFET input op-amp. The JFET input op-amps are the proper choice
+for very low input bias current then Rf value can be high as required. In figure 7.4 the ideal and the
+real (dotted) transfer-functions are drawn, using a mathematic CAD.
+
+Rev. 2
+
+24
+
+Fig. 7.4 – Ideal and real op-amp charge integrator transfer-functions
+The ideal transfer-function has one pole, the real has two. Substituting the Av(s) value in the
+transfer-function the following equation is obtained:
+
+Av 0
+Vu
+Av 0 + 1
+Rf
+(s) =
+⋅
+tA
+Idet
+⋅ s +1 Rf ⋅ Cf ⋅ s + 1
+Av 0 + 1
+The added pole in the transfer-function cuts the output rise-time: calculating the time domain
+response of the transfer-function it is clear. Letting:
+A=
+
+Av 0
+Av 0 + 1
+
+t s = Rf ⋅ Cf
+
+t op =
+
+tA
+Av 0 + 1
+
+Since the time-domain results are useful for the final signal-to-noise ratio calculation, the real opamp transfer-function is evaluated. It can be rearranged for Laplace anti-transform:
+
+Vu
+A
+Rf
+(s) =
+⋅
+Idet
+t op ⋅ s +1 t f ⋅ s + 1
+Typical detectors output requiring charge preamplifier is a constant current pulse Idet. The pulsewidth is Tdet. For time-domain output evaluation we use a double current step input. The first has
+amplitude Idet, the second has the same amplitude but negative and it is delayed by Tdet. The
+output voltage Laplace transform, with an input current step, can be written as:
+
+Vu(s) =
+
+Idet
+A
+Rf
+K1
+K2
+K3
+⋅
+⋅
+=
++
++
+s t op ⋅ s +1 t f ⋅ s + 1 s s + 1 s + 1
+t op
+tf
+
+For evaluating anti-transform K1, K2 and K3 must be found:
+
+K1 + K2 + K3 = 0
+K1⋅ (t op + t f ) + K2 ⋅ t op + K3 ⋅ t f = 0
+K1 = Idet ⋅ A ⋅ Rf
+Rev. 2
+
+25
+
+Resulting:
+
+K1 = Idet ⋅ A ⋅ Rf
+
+K2 =
+
+Idet ⋅ A ⋅ Rf ⋅ t op
+
+K3 =
+
+t f − t op
+
+Idet ⋅ A ⋅ Rf ⋅ t f
+t op − t f
+
+Finally evaluating anti-transform:
+t
+
+t
+
+−
+−
+K1
+K2
+K3
+t
++
++
+⇔ (K1+ K2 ⋅ e op + K3 ⋅ e t f ) ⋅ u(t)
+s s+ 1 s+ 1
+t op
+tf
+
+As stated before the input signal must be considered as the sum of two step functions, delayed by
+the time used from the detector to release charge Tdet. Substituting K1, K2 and K3 in the equation
+finally the time-domain output is:
+Vu(t) = Idet⋅ A ⋅ Rf ⋅ ((1 +
+
+t op
+t f − t op
+
+⋅e
+
+−
+
+t
+t op
+
+t-Tdet
+
+t
+
+t-Tdet
+
+−
+−
+−
+t op
+t
+t
+t
++ f ⋅ e t f ) ⋅ u(t) -(1 +
+⋅ e op + f ⋅ e t f ) ⋅ u(t -Tdet))
+t op − t f
+t f − t op
+t op − t f
+
+The same method applied to the transfer-function of the ideal charge preamplifier results in the
+ideal time-domain response shown in figure 6.1:
+Vuideal (t) = Idet ⋅ Rf ⋅ ((1 − e
+
+−
+
+t
+tf
+
+) ⋅ u(t) − (1 − e
+
+−
+
+t-Tdet
+tf
+
+) ⋅ u(t - Tdet))
+
+This is the time-domain response calculated using the simplified op-amp model, it results the same
+as before but with A = 1 and top → 0. Indeed, these are some of the assumptions for an ideal opamp. Please note the contributions with time-constant top: these have minus sign and tends to lower
+the rise-time. Finally, assuming Tdet = 0.5μs, Idet = 1μA and Cf, Rf, Avo and fp as above, the two
+time-domain responses can be drawn. In figure 7.5 the integrating charge transient (i.e., Tdet), in
+figure 7.6 all the decay transient. The ideal output is solid, the real is dotted:
+
+Fig. 7.5 – Initial transient of output
+
+Rev. 2
+
+26
+
+Fig. 7.6 – All transient of output
+Note: input charge is Q = Idet ⋅ Tdet = 1A ⋅ 0.5s = 0.5pC . Cf = 1 pF then, as stated above, the
+output peak value is:
+Vu =
+
+Qdet 0.5 pC
+=
+= 0.5 V
+Cf
+1 pF
+
+Tf = Rf ∙ Cf = 100 MΩ ∙ 1 pF = 100 μs. In a single pole circuit the output value decays at about 35%
+of peak value after Tf and this is easily visible in figure 6.6.
+Noise evaluation
+Noise output of a charge preamplifier depends upon the detector capacitance. The starting point for
+a good understanding of this topic is the noise model of an op-amp, shown in figure 7.7. For the
+sake of clarity in this example the op-amp is supposed ideal. The noise contribution is only the
+voltage noise source. The current noise is neglected by the above considerations on the input bias
+current: typically, a low input bias current device has negligible current noise.
+Cf
+
+Rf
+Idet
+Cd
+
+OUTPUT (Vu)
+
+En
+
+Fig. 7.7 – Charge preamplifier noise simplified model
+Calculating the noise transfer-function:
+
+Vu
+Rf ⋅ Cd ⋅ s
+Rf ⋅ (Cf + Cd) ⋅ s +1
+(s) = 1 +
+=
+En
+Rf ⋅ Cf ⋅ s + 1
+Rf ⋅ Cf ⋅ s + 1
+The equation has a pole and a zero. Letting fp and fz:
+Rev. 2
+
+27
+
+fp =
+
+1
+2 ⋅  ⋅ Rf ⋅ Cf
+
+fz =
+
+1
+2 ⋅  ⋅ Rf ⋅ (Cf + Cd)
+
+The above equation can be rewritten:
+
+jf
++1
+Vu
+fz
+(f ) =
+jf
+En
++1
+fp
+Where fp > fz. Increasing the detector capacitance Cd the difference between the two frequencies
+increases too. Bode plot of the noise transfer-function is depicted in figure 7.8.
+Vu
+En
+fp
+fz
+1
+f
+fz
+
+fp
+
+Fig. 7.8 – Output noise in a charge preamplifier using an ideal op-amp
+The output noise is evaluated using white voltage noise input. The final value of noise gain is:
+
+Vu
+Cf + Cd
+Cd
+( ∞) =
+= 1+
+En
+Cf
+Cf
+The output voltage noise is linearly increased by the Cd value due to the effect of Cd/Cf ratio. For a
+real device the noise power under 1/f corner must be considered and the simplified op-amp model
+must be substituted with a more realistic one.
+Cf
+
+Rf
+Idet
+Cd
+
+OUTPUT (Vu)
+
+Vi
+
+En
+
+Av(s) Vi
+
+Fig. 7.9 – Op-amp simplified model for noise evaluation
+Calculating the noise transfer-function:
+
+Rev. 2
+
+28
+
+Vu
+Av 0 ⋅ (Rf ⋅ (Cf + Cd) ⋅ s + 1)
+(s) =
+En
+Av 0 ⋅ (Rf ⋅ Cf ⋅ s + 1) + (t A ⋅ s + 1) ⋅ (Rf ⋅ (Cf + Cd) ⋅ s + 1)
+
+It is not simple matter to evaluate by inspection the effect of the op-amp Av0 and tA then it is done
+using a mathematic CAD. Then it s compared with the one obtained using an ideal op-amp. The two
+results are shown in figure 7.10.
+
+Fig. 7.10 – Noise transfer-function for ideal and real op-amp
+Solid line is the previously evaluated transfer-function, dotted is by the real op-amp. In both cases
+the noise power at frequency lower the 1/f corner is neglected. The noise peak value is the same
+then the ideal op-amp case. The real op-amp seems to be more advantageous. Signal-to-noise ratio
+can be evaluated by signal output peak value and output noise RMS ratio. The noise value to be
+used in the signal-to-noise ratio formula must be evaluated in the frequency domain. The value
+results integrating the square modulus of the noise transfer-function. So the high cut frequency of
+the noise transfer-function lowers the final value. Output peak value of signal must be calculated
+following the signal transfer-function above. Output noise evaluation is possible following two
+ways: the frequency-domain integration or the time-domain evaluation. The first requires the
+integration of square modulus of noise transfer-function, as stated above. This is very difficult in
+analytic form but it is easy in numeric form. The time-domain evaluation of noise can be done using
+the approximated method depicted in a following chapter.
+Charge-preamplifiers test
+Charge-preamplifiers test is gain and signal-to-noise ratio evaluation. The gain evaluation requires a
+simple setup: a charge injector and a pulse generator. The charge injector is shown in figure 7.11.
+Ci = 1 pF
+INPUT FROM
+PULSE GENERATOR
+
+OUTPUT TO
+CHARGE INTEGRATOR
+Rt
+50
+
+Fig. 7.11 – Charge injector
+When the pulse generator outputs a trapezoidal waveform a current injection take place along the
+rising and falling edges. The circuit waveform are shown in figure 7.12.
+Rev. 2
+
+29
+
+Voutput pulse generator
+
+V
+
+t
+T
+
+Td >> Tf
+
+T
+
+Td >> Tf
+
+Injected current
+CV
+T
+t
+CV
+T
+
+Fig. 7.12 – Charge injector waveform
+Following the capacitor law:
+Q inj = I inj ⋅ ∆T = Ci ⋅ ∆V = Ci ⋅ V
+
+Considering the edges, ΔV ≠ 0 only along these. Charge injection happens there. Setting the rise
+and the fall time results in setting injection charge time. Setting Voltage results in setting injected
+current. The time Td between the edges must be much greater than charge-preamplifier decay time
+Td. This allows ending discharge between another edge occurs. Complete setup for testing a charge
+preamplifier gain is in figure 7.13.
+Ci = 1 pF
+OUT
+
+IN
+Rt
+50
+
+PULSE
+GENERATOR
+
+OUT
+
+CHARGE
+PREAMPLIFIER
+
+CHARGE
+INJECTOR
+
+IN
+
+OSCILLOSCOPE
+
+Fig. 7.13 – Complete setup for testing a charge preamplifier gain of
+The injected charge is known by Ci and by pulse generator output setting. Charge preamplifier
+output can be traced using an oscilloscope. Measuring the output signal peak value and dividing it
+by the injected charge the ratio Voutput/Input charge is evaluated. The ratio has dimensions of
+mV/pC. Signal-to-noise ratio is the other fundamental requirement for a charge preamplifier. For
+signal-to-noise ratio evaluating, RMS output noise must be measured. The setup to be used is
+shown in figure 7.14.
+
+IN
+
+OUT
+
+IN
+
+Cd
+CHARGE
+PREAMPLIFIER
+
+Rev. 2
+
+RMS VOLTMETER
+
+30
+
+Fig. 7.14 –Measuring a charge preamplifier output noise setup
+Input capacitor simulates the detector capacity and, as stated before, this affects the output noise.
+Moreover, modern digital oscilloscopes can evaluate the RMS value of a traced signal. Once the
+RMS output voltage is measured it can be divided by the gain obtaining the equivalent input noise
+charge. Finally signal-to-noise ratio is evaluated dividing the typical charge injected by the detector
+by the equivalent input noise charge of the preamplifier. Often the equivalent input noise charge
+only is evaluated. In other cases it is also converted in electrons dividing charge input by electron
+charge value. Typical values of equivalent noise charges are hundreds of electrons for 50 pF
+detector capacity (Si, Ge) and one thousand for 400 pF detector capacity (drift chambers).
+V. Radeka charge preamplifier
+One of the most popular charge preamplifier circuit was initially proposed by V. Radeka. It is done
+using discrete components. It is done around a folded cascade, as shown in figure 7.15.
+Vcc
+
+INPUT
+OUTPUT
+
+Vee
+
+Fig. 7.15 – Radeka charge preamplifier
+A simplified equivalent circuit is shown in figure 7.16. There are the circuit building bricks
+highlighted. The reader will be driven in the recognition of these. The amplifier is a folded cascode
+with a JFET input device and a RF PNP transistor used in common base configuration. The folded
+cascode is loaded with an active load, this is a current generator (i.e., current sink) done with a NPN
+transistor. An emitter follower stage is used for obtaining a low output impedance.
+
+Rev. 2
+
+31
+
+Vcc
+Vcc
+
+INPUT
+
+Vb1
+FOLDED
+CASCODE
+
+EMITTER
+FOLLOWER
+
+INPUT
+
+OUTPUT
+
+OUTPUT
+Vgs
+
+Vb2
+
+gm Vgs
+
+Rsink
+
+Csink
+
+Vsink
+
+Vsink
+
+Vee
+ACTIVE
+LOAD
+
+Vee
+
+FEEDBACK
+NETWORK
+
+Fig. 7.16 – Radeka equivalent circuit
+A further simplification is performed and showed in the right side of figure 6.16. The final
+equivalent circuit results quite simple. Rsink and Csink are the cascode output loads. By inspection
+the circuit is an op-amp provided only of the inverting input, the open-loop gain Av(s) is:
+Av(s) =
+
+gm ⋅ R sink
+1 + R sink ⋅ C sink ⋅ s
+
+The great idea is the use of few discrete components for building an op-amp. This is particularly
+suitable for use in charge-preamplifiers. Since the JFET input device, the input impedance is high
+and the input bias current is low. The JFET is also a low noise device. Noise analysis can follows
+the same way previously used for real op-amp: the noise source is a voltage source and it must be
+inserted between the input node and the JFET gate. Typical values in the circuit are:
+•
+•
+•
+•
+
+gm ≈ 45000 mS (BF862);
+en ≈ 0.7 nV/√Hz;
+Rsink ≈ 100 kΩ;
+Csink ≈ 15 pF.
+
+Note the equivalent circuit is really simplified: the output stage time-constant is neglected and it
+must be considered only when stability of the circuit is evaluated. Particularly when the feedback
+network loses its dominant pole. The resistor between the drain of JFET and the emitter of PNP
+transistor is for stability, as written above regarding stability of emitter follower. It is typically 33
+Ω. The real value of a 1 pF capacitor is always affected by the layout. The precision of gain value
+depends upon the precision of feedback capacitor. A greater capacitor value can lower the layout
+effects. There is a simple way to use a grater value capacitor in the feedback network, this results in
+less layout dependency. This circuit is shown in the figure 6.17.
+
+Rev. 2
+
+32
+
+Vcc
+
+INPUT
+OUTPUT
+9R
+
+R
+
+Vee
+
+10 Cf
+
+Fig. 7.17 – Using a greater capacitor in feedback network
+
+Rev. 2
+
+33
+
+8. CHARGE TO DIGITAL CONVERTERS (QDC)
+QDC integrates the current at their input along a fixed time. For this purpose a QDC needs the gate
+signal issuing the integration time. Typically, the gate is active during the integration time.
+Optionally, QDC has a clear input signal for rejecting conversion and resetting its internal circuits.
+The QDC is done by two sections: the charge integrator and the analogue-to-digital converter. The
+charge integrator performs the input current integration then the analogue-to-digital converter
+samples its output and converts its value in a digital format. The charge integrator is typically an
+analogue circuit. Modern trends are numerical integration of input charge after input voltage
+gigasampling. This is possible by lower cost and greater availability of very fast analogue-to-digital
+(ADC) converters and high-performance FPGA. However, today analogue techniques in some
+applications are irreplaceable: for example in space applications, where not all the components are
+space-grade available, or where a great number of channels is involved, so too many ADC are
+required and the costs are not acceptable. Then digital integration will be treated in future papers
+and here the analogue integration only will be explained. There are mainly two analogue techniques
+for performing charge to digital conversion: charge-to-voltage and charge-to-time. The first uses an
+ADC for digital conversion, the second uses a time-counter for digital conversion. Decreasing the
+cost of ADCs the first substituted the second. The second is anyway the less expensive one but it
+requires a longer conversion time. It has other advantages as easy integration of a great number of
+channels using a FPGA for implementing many counters. In the figure 8.1 the typical QDC blockdiagram using charge-to-voltage conversion is shown. For the sake of clarity the block are supposed
+ideal.
+Clear
+
+Gate
+
+Sample
+
+n
+
+INPUT
+ADC
+
+TO DATA-WAY
+
+Fig. 8.1 – QDC block diagram
+The gate signal connects the integrator input to the signal. Once gate signal is ended the input
+switch is open again. Now the integrator output is stop at its final voltage and the ADC has time to
+perform numerical conversion. After this the output digital datum is sent to data-way for readout
+and a clear is issued for resetting integrator to its initial status. The ADC has n-bits resolution. The
+command signal is gate, all the other signals are internal and all issued from gate. This is evidently a
+charge-to-voltage type QDC. The timing diagram of the signals is in figure 8.2.
+
+Rev. 2
+
+34
+
+INPUT CURRENT
+
+GATE
+
+INTEGRATOR OUT
+
+SAMPLE
+
+CLEAR
+
+DATUM AVAILABLE
+Conversion time
+
+Fig. 8.2 – QDC timing diagram
+In figure 8.2 is highlighted the conversion time. This is one of the most important characteristic of
+the ADC and consequently for QDC. It is intended as the time elapsed between the end of gate and
+the time when the datum is available to the data-way. The circuit depicted is very simplified and it
+works when particular conditions are accomplished: the input current must be greater then the input
+bias op-amp and the charge injected by the analogue switches must be constant. Generally the
+second is not true in particular when the analogue switches are done using CMOS devices. These
+inject charge during switching. This occurs through the gate-drain capacitance and it is not a linear
+phenomenon since it is depending upon the drain-gate voltage. The other way to do analogue
+switches is using long-tails, as previously seen in analogue majority section. These have little nonlinearity problems due to the hfe dependency by the collector current. Anyway generally this is
+negligible. Naturally the designer’s choice depends by the circuit application and by his experience.
+This is one of the first issue to be analyzed when starting a new QDC design. In the following some
+examples of integrators are explained. In some old applications a charge preamplifier and two
+sample-and-hold circuits was used to integrate the input current between a start and a stop time. The
+circuit is shown in figure 8.3. At Tstart the sample-and-hold A holds the baseline value, at Tstop the
+sample-and-hold B holds the output of the charge preamplifier. The difference between the two
+values is related to the charge integrated between Tstart and Tstop.
+Cf
+
+Rf
+Idet
+Tstart
+A
+Sample & Hold
+
+Tstop
+B
+Sample & Hold
+
+Fig. 8.3 – Analogue evaluation of charge
+Rev. 2
+
+35
+
+OUTPUT
+
+The timing of the signals in the circuit is shown in figure 8.4.
+INPUT CURRENT
+
+GATE
+
+INTEGRATOR OUT
+Decay
+A SAMPLE
+
+B SAMPLE
+
+ADC SAMPLE
+
+DATUM AVAILABLE
+Conversion time
+
+Fig. 8.4 – Charge-preamplifier QDC timing diagram
+In figure 8.4 the decay-time of the charge-preamplifier is oversized. The designer must be carefully
+to the maximum time elapsed from input signal and closing gate time. In this time the output decay
+cannot exceed the value of one LSB of the ADC resolution, otherwise a resolution loose can occur.
+The A sample-and-hold can also reject previous charge arrived from the detector or slow
+fluctuations of the charge-preamplifier outut due to low frequency noise. The circuit above is built
+using a charge-to-voltage converter. Another charge-to-voltage circuit, often used with PMTs, is
+shown in the figure 8.5. This circuit has been produced and used in thousands of channels. These
+was done using op-amps or discrete components. The input voltage, intended as input current in the
+termination resistor, is converted using an op-amp or a discrete components similar circuit. Then a
+capacitor is used as integrator. The gate is done with a long-tail and the clear with a MOSFET.
+
+To ADC
+
+Vcc
+C
+Gate
+
+Clear
+
++ INPUT
+Gate
+Rt
+
+- INPUT
+Rt
+Re
+
+Vee
+
+Fig. 8.5 – QDC using voltage-to-current converter
+For the sake of clarity the circuit depicted uses an op-amp. The resistor Re bias the voltage-tocurrent stage output and causes a non-zero readout with no input signal. This value is called
+“pedestal” and it is not a defect but it is used for checking proper circuit operations. The voltage-toRev. 2
+
+36
+
+current converter is a typical op-amp application, it is well described by many integrated-circuit
+suppliers in many linear application notes. When the gate is closed the current coming from input
+conversion is discharged to ground, otherwise this flows into the capacitor causing a voltage output
+change. This follows the previously eported equations. When the gate-on time is elapsed the
+capacitor stay charged and the ADC can convert this voltage to a numeric value. Finally a clear
+pulse resets the circuit to its initial conditions. The output buffer must have great input impedance
+for avoiding capacitor discharge due to its input bias current. The timing of the signals in the circuit
+are about the same that in the figure 8.2. The circuit can be easily modified to work as a charge-totime converter. In this application the ADC is not used and a time-counter is used, as shown in
+figure 8.6.
+Vcc
+Idsc
+n
+
+Vcc
+COUNTER Q
+
+TO DATA-WAY
+
+CLR
+
+C
+Gate
+
+TIMEBASE
+OSCILLATOR
+
++ INPUT
+
+Clear
+
+Gate
+Rt
+
+- INPUT
+Rt
+Re
+
+Vee
+
+Fig. 8.6 – QDC using charge-to-time converter technique
+The current generator Idsc is used for discharging capacitor to the clamping voltage set by the
+diode. This generator is always active and its current is subtracted to the pedestal current. This
+circuit works as the previously described until the gate become off. Then the voltage at the output
+buffer ramps-up to the clamping voltage. All the time when the output voltage is under threshold is
+digitally evaluated counting the time-base pulses arrived to the counter. Then the datum is available
+to the data-way and the counter can be reset. Idsc must be set small enough to allow the counter
+overflow at full-range input. A very fast modern counter, into a FPGA, can work at some hundred
+of MHz. The required QDC resolution can be 12 bits or more so the time needed by the counter for
+overflow can be as long as 10 μs when time-base is 400 MHz. A fast ADC can convert at 12 bits of
+resolution in ns. From this consideration the longer conversion-time of a charge-to-time converter
+versus a charge-to-voltage one. Obviously in a FPGA, that is cheaper then a fast ADC, many
+counters can be fitted realizing a sort of scale economy for a great channels number. In the figure
+8.7 the signal timings of the charge-to-time converter are shown.
+
+Rev. 2
+
+37
+
+INPUT CURRENT
+GATE
+BUFFER OUT
+
+COMPARATOR OUT
+COUNTER INPUT
+CLEAR
+DATUM AVAILABLE
+Conversion time
+
+Fig. 8.7 – Charge-to-time QDC timing diagram
+In figure 8.7, the clamping voltage is neglected. This is not a problem when understanding how the
+circuit works. If the total charge in C is Q the time required for discharge or conversion time is:
+
+Conversion time =
+
+Q
+Idsc
+
+The charge-to-voltage converters described above use standard ADC. In this components there is
+the problem of differential nonlinearity (DNL). It is intrinsically due to design and this problem
+does not afflicts the conversion done in charge-to-time operations. DNL is due to the difference
+between the bins width. The interested reader can find exhaustive description also in Wikipedia.
+Obviously in a time-to-digital converter the base-time pulses to be counted can be considered all
+with the same width, neglecting jitter. Moreover the jitter can influence a single pulse but counting
+a long pulse sequence the DNL can arise only if the oscillator frequency changes significantly along
+the measurement.
+Sliding-scale conversion
+When very low DNL is required, for example in spectroscopy, a proper technique is used. It is
+called sliding-scale conversion. Since the DNL of an integrated ADC depends upon the point of the
+range where the conversion occurs, E. Gatti and P. F. Manfredi proposed this technique. In figure
+8.8 is shown the block-diagram of the sliding-scale converter.
+
+Rev. 2
+
+38
+
+Analogue adder
+
+Digital subtractor
+
+ANALOG INPUT
+
+ADC
+
+TO DATA-WAY
+
+DAC
+Digital to analogue
+converter
+PSEUDO-RANDOM
+SEQUENCE
+GENERATOR
+
+Fig. 8.8 – Sliding-scale converter
+It tricks the ADC converting the same input value in a pseudo-random different point of the ADC
+range. So the DNL of the device is reduced distributing itself on many bins. The cost is a little
+reduction of the converter’s input range and a more complicated circuit but with sliding-scale NLD
+can be drastically reduced. For each conversion cycle the pseudo-random generator outputs a digital
+value. This is converted in an analogue voltage by the digital-to-analogue converter (DAC) and
+added to the input signal. Then the ADC converts such a voltage and the digital pseudo-random
+value is subtracted. Please note: the NLD measurement is very time-expensive since it requires a lot
+of events to be acquired. One calibrated ramp-generator is connected to the circuit and it is
+randomly sampled. The acquired values are uniformly distributed in amplitude and an histogram is
+evaluated. The maximum difference between the histogram bins amplitude is related to the mean
+bin amplitude. A good converter can result in 1% of NLD or better and a resolution of 12 bits. In
+this case, for good statistic practice, the chi-square test requires to perform hundred of thousand of
+acquisitions.
+
+Rev. 2
+
+39
+
+9. TIME TO DIGITAL CONVERTERS (TDC)
+TDC measures the elapsed time between a start and a stop signals. The TDC can be done using
+digital and analogue or fully digital techniques. The first are done by two sections: the time
+converter and the analogue-to-digital converter. The time converter can perform a time-toamplitude or a time-to-time conversion. The time-to-amplitude conversion is done integrating a
+constant current along the time between the start and the stop signals the final value of integration is
+the converted numerically using an ADC. The time-to-time conversion is also performed charging
+with a constant current a capacitor but then discharging it with a very smaller current. As seen in
+charge-to-time conversion the time elapsed for discharging is longer then that for charging
+proportionally to the two current ratio. For this converter the numeric conversion is performed
+measuring the discharge time. This technique was used in the past for the same problems of the
+charge-to-amplitude and now it is used only is space applications. In figure 9.1 is depicted a timeto-amplitude converter.
+
+To ADC
+
+Vcc
+START
+
+C
+Rt
+
+SET
+
+/Q
+
+Clear
+
+SR-FF
+RESET
+
+STOP
+
+Q
+
+I
+Rt
+
+Fig. 9.1 –Time-to-amplitude converter TDC
+In figure 9.2 are shown the timing diagram of the time-to-amplitude TDC.
+START
+
+STOP
+
+CAPACITOR VOLTAGE
+
+SAMPLE
+
+CLEAR
+
+DATUM AVAILABLE
+Conversion time
+
+Fig. 9.2 – Time-to-amplitude TDC timing diagram
+In this case, also following the capacitor charge equations, the final capacitor voltage is:
+Rev. 2
+
+40
+
+Capacitor voltage =
+
+I ⋅ ∆T
+C
+
+Where ΔT is the time elapsed between the start and the stop signals leading edges. The time-to-time
+converter is depicted in figure 9.3.
+Vcc
+Idsc
+n
+
+Vcc
+COUNTER Q
+
+START
+Rt
+
+SET
+
+/Q
+
+TIMEBASE
+OSCILLATOR
+
+SR-FF
+RESET
+
+TO DATA-WAY
+
+CLR
+
+C
+
+Clear
+
+Q
+
+STOP
+
+I
+Rt
+
+Fig. 9.3 – Time-to-time converter TDC
+Also in this circuit the current generator Idsc is used for discharging capacitor to the clamping
+voltage set by the diode. This generator is always active and its current is subtracted to the charging
+current I. This circuit works as the previously described until the leading edge of the stop signal
+occurs. Then the voltage at the output buffer ramps-up to the clamping voltage. All the time when
+the output voltage is under threshold is digitally evaluated counting the time-base pulses arrived to
+the counter. Then the datum is available to the data-way and the counter can be reset. Idsc must be
+set small enough to allow the counter overflow at full-range input. Also for this circuit the
+considerations regarding resolution and conversion time are the same made for the charge-to-time
+converter. But in this case the longer conversion-time of this converter is the trailing idea since the
+time that to be measured can be of the order of hundred of nanoseconds with resolution of tenth of
+picoseconds. This cannot be measured counting a time-base with a digital counter. For this the timeto-time converter is a sort of “time-expander” and with this expansion a short time become long
+enough to be counted digitally. In figure 9.4 the signal timings of the time-to-time converter are
+shown.
+START
+STOP
+BUFFER OUT
+
+COMPARATOR OUT
+COUNTER INPUT
+CLEAR
+DATUM AVAILABLE
+Tu
+
+Conversion time
+
+Fig. 9.4 – Time-to-time TDC timing diagram
+
+Rev. 2
+
+41
+
+Clamping voltage is neglected also in figure 9.4,. Again this is not a problem for understanding how
+the circuit works. The capacitor voltage Vc after the unknown time Tu is:
+
+Vc =
+
+(I - Idsc) ⋅ Tu
+C
+
+The conversion time is
+
+Conversion time =
+
+C ⋅ Vc (I − Idsc) ⋅ Tu
+=
+Idsc
+C
+
+So the conversion time to unknown time ratio is:
+
+Conversion time (I − Idsc)
+I
+=
+=
+−1
+Tu
+Idsc
+Idsc
+Setting I/Idsc ≈ 200 and the time-base frequency at 100 MHz the resolution of the RDC is 50 ps, for
+an input range of 100 ns the conversion time results about 20 μs.
+Fully digital TDCs
+The simplest digital TDC, a stopwatch, is a counter of a time-base pulses along the unknown time
+to measure. This is showed in figure 9.5.
+START
+n
+Rt
+
+SET
+
+Q
+
+COUNTER Q
+
+SR-FF
+
+TO DATA-WAY
+
+CLR
+
+RESET
+
+TIMEBASE
+OSCILLATOR
+
+STOP
+
+Clear
+
+Rt
+
+Fig. 9.5 – Stopwatch
+A modern counter, using sub-nanosecond logic, could be driven with frequencies as high as 1 ÷ 2
+GHz resulting in a resolution of 0.5 ÷ 1 ns as faraway from the 50 ps of the time-converter
+techniques. In the past, when the fastest counters worked at 100 ÷ 200 MHz, a delay-line
+interpolator was realized. It is shown in figure 9.6.
+
+Rev. 2
+
+42
+
+TIMEBASE
+OSCILLATOR
+1/Tb
+
+GRAY
+COUNTER
+MSB LSB
+
+n
+TAPPED DELAY-LINE
+k TAPS Tb/(k+1)
+0 1 2
+
+START
+
+LATCH
+
+k
+
+DECODER
+
+DIGITAL
+SUBTRACTOR
+
+STOP
+
+LATCH
+
+TO DATA-WAY
+
+DECODER
+
+Fig. 9.6 – Delay-line interpolator
+The schematic in figure 9.6 is very simplified: the counter overflow is not considered and the bus
+width are not specified. Although there are important highlights:
+•
+
+the Gray counter, whose output changes only a bit every clock-cycle, is the best choice
+against metastability, this is balanced by the decoder complexity;
+• the number of taps should be a power of two, it results in a finite number of bits added by
+the interpolator;
+• the processing of the numbers frozen into the latches can be slowly, also off-line, so the
+fastest sections of the circuit are the latches.
+In this way 3 or more bits was added to the digital counter resolution enhancing the TDC resolution
+by 8 or more. Today this circuit is no longer used but it is an important milestone to understand
+modern digital TDC. These are always built around a delay-line as in depicted above but they are
+integrated into chips and uses a delay-line loop as shown in figure 9.10.
+TIMEBASE
+OSCILLATOR
+1/Tb
+
+VDD
+
+CMOS
+GATE
+
+VDD
+
+CMOS
+GATE
+
+VDD
+
+VDD
+
+CMOS
+GATE
+
+CMOS
+GATE
+
+VDD
+
+CMOS
+GATE
+PHASE
+DETECTOR
+
+VDD
+
+INPUT SIGNAL
+
+CMOS
+GATE
+
+VDD
+
+CMOS
+GATE
+
+VDD
+
+VDD
+
+CMOS
+GATE
+
+CMOS
+GATE
+
+LOOP
+FILTER
+
+VDD
+
+CMOS
+GATE
+
+TAPPED DELAY OUT
+
+Fig. 9.10 – Delay-line loop
+Rev. 2
+
+43
+
+The input-output delay of a CMOS port depends upon its supply voltage. The circuit has the same
+loop of a Phase locked loop so it controls the supply voltage of the ports adjusting the total delay.
+These ports are integrated on the same silicon in a dual or more cascaded chains. One of these
+chains, the upper in figure 9.10, is used as reference. The same supply voltage is used for all the
+chains and the equality of delays is guaranteed by the geometric symmetry and by the presence on
+the same chip. The integration allows also a greater speed for counters and latches resulting in a
+resolution very close to a time-converter.
+
+Rev. 2
+
+44
+
+10.
+
+PASSIVE-SPLITTERS AND ATTENUATORS
+
+Many circuits described above need to connect input or output signals using matched lines. This
+requires special accessories for splitting or attenuations of signals.
+Splitting signals
+This is the case when one signal must be sent to two or more circuits with proper impedance
+matching. The technique to use are different depending from the bandwidth of the signals. In radiofrequency, from long-waves to microwaves, these circuits work on phasing of the signals and they
+cannot work from DC. This disadvantage is offset by lower attenuation of the signals. Unfortunately
+in high-energy physics this is not the case so this circuits will not be treated in this paper. Anyway
+the interested reader can look for “power-combiner” in bibliography. In the electronics for highenergy physics the signals can be DC coupled or AC coupled but in this case the low cut-off
+frequencies cannot be covered by the power-combiners. So the circuits to use are the passivesplitters. These can match the impedances from DC to some GHz but with more attenuation and
+these are cheaper then the power-combiners. In figure 10.1 is the schematic of a n-outputs passive
+splitter.
+Rs
+
+Rs
+
+Rt
+
+Rs
+
+OUT #1
+
+OUT #2
+
+Rs
+
+Vs
+
+Rs
+
+Rs
+
+Rt
+
+Rt
+
+Rt
+
+OUT #n-1
+
+OUT #n
+
+Rt
+
+Rt
+
+Fig. 10.1 – Generic n-outputs passive-splitter
+The passive-splitter is a generic one with one input and n-outputs, each port is matched to the some
+impedance. By the symmetry of the circuit the internal resistors have the same value. The Rs value
+must be evaluated for proper impedance matching. By the symmetry the equivalent schematic is in
+figure 10.2.
+
+Rev. 2
+
+45
+
+Rt
+
+Rs
+
+Rin
+
+Rs
+Vu
+Rt
+n-1
+
+Vs
+
+Vin
+
+Rt
+Rs
+n-1
+
+Fig. 10.2 – equivalent circuit of generic n-outputs passive-splitter
+For proper matching must be the input resistance Rin:
+Rin = Rs +
+
+Rs + Rt
+= Rt
+n
+
+Solving the equation results:
+
+Rs =
+
+n - 1
+⋅ Rt
+n + 1
+
+The equation above is the matching condition for the passive-splitter. In this case the attenuation of
+the circuit is:
+Vu
+Rt
+1
+=
+=
+Vin
+(n +1) ⋅ Rs + Rt
+n
+
+Please note the choice of Vin as input voltage instead of Vs: operating with matched lines the
+easiest voltage to measure is when the signal is terminated on the proper impedance Rt. So
+connecting for example a signal to an oscilloscope with input termination 50 Ω this measure Vs
+after the partition between Rt and Rt, it is half Vs that equals Vin.
+
+Rev. 2
+
+46
+
+Attenuating signals
+This is the case when a signal must be sent from generator to load with attenuation and impedance
+matching. The circuit to be used is named attenuator. It can be done using two kinds of resistor
+networks. In figure 10.3 the two networks are shown.
+Rt
+
+Ra
+
+Rt
+
+Rb
+
+Rb
+
+Vs
+
+P ATTENUATOR
+
+Rt
+
+Ra
+
+Ra
+
+Rt
+
+Rb
+Vs
+
+T ATTENUATOR
+
+Fig. 10.3 – P and T attenuators
+The most important parameters of an attenuator are:
+•
+•
+•
+
+attenuation;
+matching impedance;
+bandwidth.
+
+The attenuation and the matching impedance are evaluated using the schematic in figure 10.4
+Rt
+ATTENUATOR
+Vs
+
+Vi
+
+Vu
+
+Rt
+
+Fig. 10.4 – Evaluating attenuation and matching impedance of an attenuator
+The point of measure of Vi and Vu are chosen for the same reasons of the choice in the passivesplitter: these are in the most easily point to be practically measured. Attenuation is a ratio between
+input and output voltage, it can be expressed as a number or in dB. Usually it is in dB.
+Av =
+
+Vu
+Vi
+
+A dB = 20 ⋅ log10 (
+
+or in dB
+
+Vu
+)
+Vi
+
+In the following table there are the equations for evaluate Ra and Rb when the attenuation and the
+matching impedance Rt are known.
+
+Rev. 2
+
+47
+
+P attenuator
+Rb ⋅ Rt
+Av =
+Ra ⋅ (Rb + Rt) + Rb ⋅ Rt
+1 − Av 2
+Ra = Rt ⋅
+2 ⋅ Av
+1 + Av
+Rb = Rt ⋅
+1 − Av
+
+T attenuator
+Rb ⋅ Rt
+Av =
+Ra ⋅ (Ra + 2 ⋅ Rb + Rt) + Rb ⋅ Rt
+1 − Av
+Ra = Rt ⋅
+1 + Av
+2 ⋅ Av
+Rb = Rt ⋅
+1 − Av 2
+
+The bandwidth of an attenuator cannot be easily evaluated since it depends upon the parasitic
+components and the layout. Building a 20 dB home-made attenuator using surface-mountedresistors and doing very short connections can easily obtained 1 GHz bandwidth. Commercial
+attenuators must be purchased considering impedance, attenuation, bandwidth and accuracy.
+
+Rev. 2
+
+48
+
+11.
+
+A NUMERICAL METHOD FOR SOLVING CIRCUITS
+
+Today many simulation tools are available. These can evaluate bias-point, time and frequency
+domain analysis. The post-layout and signal-integrity analysis can be performed. A good radiofrequency tool can also solve Maxwell’s equations and tell the electromagnetic field around the
+circuit resulting in complete simulations of transmission lines and antennas on a printed-circuit
+board. There are some situations where the use of such a tools can result quite intricate: for example
+evaluating signal-to-noise ratio in a charge preamplifier. In case of using SPICE in the time-domain
+the designer must generate an input plus noise signal then sample it and use it as input stream to the
+simulator. In these simulations statistics and visual animations are very important so the noise
+generation and simulation must be performed many times. It can really result very intricate. Instead
+of this the following method can be used. It was used successfully by my shareholder Andrea
+Puccini and me for designing the ICARUS preamplifier. It starts from the Laplace transform of the
+transfer function of a circuit. Then this is transformed in a time-domain recursive equation. A datainput sequence is obtained sampling the input signal an adding it to the noise generated on-line by a
+software noise-generator. This data-stream is used as input for the recursive equation obtaining
+directly the output data. For many simulations the repetition of the input signal is enough: the noise
+is real-time generated and the output statistics can be evaluated. The strength of the method is in its
+simplicity and power. Using a recursive equation don’t set limits to the input sequence length and
+the CPU time is very short.
+Evaluating the recursive equation from transfer-function
+For simplify the method explanation all the theoretical arguments will be omitted, the Shannon
+theorem will be the only used. The reader that is interested to theory can start studying the ztransform that has the some basis. The starting point is an RC circuit, as shown in the figure 11.1.
+This is a simple first-order low-pass filter.
+R
+Vu(s)
+Vi(s)
+
+C
+
+Fig. 11.1 – RC circuits used as example
+Evaluating transfer-function:
+Vu
+1
+(s) =
+Vi
+R ⋅C⋅s+1
+
+Where s is the Laplace operator. Mathematicians will forgive me for all I am writing, this is
+equivalent to a derivative operator:
+
+s ⋅ f (s) ↔
+
+df (t)
+dt
+
+When f(t) is sampled every Ts, becoming a discrete-time array of values fn, this can be
+approximated with:
+
+Rev. 2
+
+49
+
+1
+(f n - f n-1 )
+Ts
+Now the signals Vi(t) and Vu(t) can be transformed in the same way in the two discrete-time array
+of values Vin and Vun. These can be used in the transfer-function after substitution of s variable
+with the operator above:
+s ⋅ f (s) ↔
+
+Vu ⋅ (R ⋅ C ⋅ s + 1) = Vi
+
+The equation becomes:
+
+R ⋅C⋅
+
+Vu n − Vu n −1
++ Vu n = Vi n
+Ts
+
+This can be rearranged:
+
+Vu n ⋅ (
+
+R ⋅C
+R ⋅C
++ 1) - Vu n-1 ⋅
+= Vi n
+Ts
+Ts
+
+Vu n = (
+
+R ⋅C
+Ts
+) ⋅ Vu n-1 +
+⋅ Vi n
+R ⋅ C + Ts
+R ⋅C
+
+And finally:
+
+An input signal array evaluated on N values is the array Vin with n = 0 .. N-1. This can be used in
+the recursive equation for evaluating Vun. Please note that the value Vun-1 has index out of range
+when n = 0. This problem results from the basic network theory: the circuit includes a capacitor so
+the differential equations governing the circuit requires an initial condition. This is the capacitor
+voltage initial value. So the value of Vun-1 must be chosen by the initial output voltage. If at initial
+time the capacitor was charged at the initial voltage V0 the output voltage is V0 and Vu-1 = V0. A
+simple program that reads the Vin, take memory of Vun-1 evaluating the new Vun is very easy to
+write, as few rows of C-code. In the following there are many examples of these programs. The
+example above is very simple but it can be extended to more complex circuits. When in the transferfunction the s variable appears in a power more than one the substitution with a time-discrete
+derivative can be reiterated:
+
+s2 ⋅ f (s) ↔
+
+1
+(f n - 2 ⋅ f n-1 + f n-2 )
+Ts2
+
+sm ⋅ f (s) ↔
+
+m
+1 m
+(-1) i ⋅( ) ⋅ f n - i
+m ∑
+i
+Ts i=0
+
+And generically:
+
+Now the question is about the applicability field of the method. Without complex analytical
+analysis, that are reserved to mathematicians, the Shannon theorem can be considered. There is a
+reasonable possibility that the method works properly if the sampling time is very smaller (20 ÷
+1000 times) then the minimum time-constant involved in the circuit and in the input signal. As in
+every other simulation technique only the experience of the user can help to understand if all is
+properly working. The user should start with simple circuits comparing the results with the
+theoretical and let his experience grow up. The readers that have familiarity with the z-transform
+Rev. 2
+
+50
+
+can observe that the automatic transform between the Laplace variable and the z variable produces
+the same results:
+1
+s ↔ (1 − z −1 )
+Ts
+Evaluating the equations at the end of time-domain anti-transform the recursive equation is the
+same. Proceeding with substitution:
+
+Vu
+(z) =
+Vi
+
+1
+Ts
+=
+−1
+1− z
+R ⋅ C + Ts - R ⋅ C ⋅ z -1
+R ⋅C⋅
++1
+Ts
+
+A z-domain transfer-function is in the form:
+
+∑i a i ⋅ z −i
+Vu
+(z) =
+Vi
+∑ b j ⋅ z− j
+
+so it is
+
+Vu(z) ⋅ ∑ b j ⋅ z − j = Vi(z) ⋅ ∑ a i ⋅ z − i
+j
+
+i
+
+j
+
+This can anti-transformed substituting:
+V(z) ⋅ z − k = Vn-k
+
+The equation above becomes:
+Vu n ⋅ (R ⋅ C + Ts) − Vu n −1 ⋅ R ⋅ C = Vi n ⋅ Ts
+
+That is the same result obtained using the proposed method. The z-transform allows the use of other
+substitutions between the operators s and z. One of this is bilinear transformations that is used when
+some filter must be designed preserving ratios between frequencies. Further details are beyond the
+scope of this paper but this transformation is anyway the following:
+
+s↔
+
+2 (1 − z −1 )
+Ts (1 + z −1 )
+
+With the first-order low-pass filter it has been shown how to evaluate a recursive equation starting
+from the transfer-function in Laplace transform domain. With this recursive equation a time-domain
+array of samples can be easily obtained from an array of samples of the input voltage. It is easy to
+apply this method to the voltage or to the current output by the detector evaluating electronics’
+output. In the following a C-code evaluating results for n array of data is shown:
+
+Rev. 2
+
+51
+
+/***************************************************************************/
+/* LOW_PASS_1: performs a first-order low-pass filtering to input array of */
+/* float data_in. Data output i salso an array of float data_out, both
+*/
+/* arrays are of length len. The float values fc and fp are respectively
+*/
+/* the sampling and the cut-off frequencies.
+*/
+/* The initial condition of the filter is Vu(-1) = 0.
+*/
+/***************************************************************************/
+void low_pass_1(float *data_in, float *data_out, float fc, float fp, int len)
+{
+int i;
+float a; /* contiene il rapporto fc/(2*M_PI*fp) */
+float b; /* contiene il valore di 1+a
+*/
+a=fc/(2*M_PI*fp);
+b=1+a;
+data_out[0]=data_in[0]/b;
+for (i=1; i<len; i++)
+data_out[i]=(data_in[i]+data_out[i-1]*a)/b;
+
+}
+
+The code is really simple and it is written for working on arrays input-output but it can be easily
+rearranged for recursive operations.
+Evaluating signal-to-noise ratio of a circuit
+The method can be used to evaluate signal-to-noise in a circuit. What it is needed at this point is a
+recursive noise evaluation. The noise must have white Gaussian statistics so a simple evenly
+distributed random number generator cannot work. Fortunately there is an algorithm that can
+transform such an array of in one with white Gaussian statistics: the Box-Muller transformation.
+More details on this are left to mathematicians. In the following equation is depicted the
+transformation from two random numbers RND(seed) and a Gaussian value with mean value μ and
+standard deviation σ. RND(seed) means a random generated number with pseudo-random sequence
+of seed (seed):
+N (  ,  ) =  +  ⋅ cos( 2 ⋅  ⋅ RND ( seed )) ⋅ − ln( RND ( seed )
+
+So an array of N samples can be easily evaluated executing N-times the Box-Muller transform.
+Please note that the transformation can be used on a full array resulting in an array of noise or it can
+be applied sample by sample and adding noise to input incoming data. Generally electronic noise is
+supposed to be white with mean value equal to zero (μ = 0). The standard deviation must
+accomplish the statistics of noise given by the device datasheet. The typical equivalent input noise
+voltage of a JFET is shown in figure 11.2.
+
+Fig. 11.2 – Typical equivalent input noise voltage of a JFET
+Rev. 2
+
+52
+
+As the reader can see there is a sort of corner frequency on the left. It can be evaluated fitting the
+high slope section of the graphic and getting the frequency where the fit intercepts the line of
+constant value of noise. Anyway this is usually specified by the supplier in the datasheet, specially
+when the device is particularly suitable for low-noise applications. For the purposes of this paper
+the noise spectral contribution is that is over the corner frequency, the under corner is negligible and
+it is interesting only in very low-frequency applications. So finally the noise spectral density en to
+use is that in the plane section of graphic. For example a very low-noise JFET has en = 0.7 nV/√Hz,
+please note this is not the case of the figure 11.2. In Box-Muller transform a proper σ value must be
+used for equivalent results in time-domain. For ICARUS experiment front-end design the following
+equation was used for evaluating σ from en and sampling time Ts:
+
+ = en ⋅
+
+1
+2 ⋅ Ts
+
+It derives from equivalence of RMS value after sampling process compared with RMS evaluated
+integrating noise power spectrum. In the following a C-code for evaluating a noise array.
+/***************************************************************************/
+/* W_NOISE generates white noise samples in the array of float data_out of */
+/* length len. The noise has mean value = 0 and standard deviation = 1.
+*/
+/* Before calling w_noise the function randomize() must be called.
+*/
+/***************************************************************************/
+void w_noise (float *data_out, int len)
+{
+int i;
+for (i=0; i<len; i++)
+data_out[i]=(float)(cos(2*M_PI*((double)(random(1000)+1)/1000))*
+sqrt(-2*log((double)(random(1000)+1)/1000)));
+}
+
+After the noise sequence is generated each sample must be multiplied by σ, the resultant array must
+be added to the sampled input signal array. These data are ready to be processed with the recursive
+equation resulting by transfer-function transforming.
+A more generic circuit transfer-function example
+So far almost all the useful information about the use of the presented method are disclosed. The
+topic can be deepened with some more examples. The recursive equation can be evaluated for a
+complex network starting from the transfer function of all the circuit. It involves that if the circuit
+can be decomposed in a cascade of simpler parts each of these can have a proper recursive equation.
+Then cascading the single sections is simply to evaluate in sequence each section’s recursive
+equation. This is done calling in sequence each C-function. For this reason in the following a Cfunction evaluating a generic second order filter is presented. This can used to solve a lot of circuits.
+When it does not cover the full transfer-function it can be evaluated by the reader or this generic
+one can be used cascaded.
+
+Rev. 2
+
+53
+
+/***************************************************************************/
+/* FILTER_1: filter evaluating the generic transfer-function:
+*/
+/*
+*/
+/*
+Y(s)
+A + sB
+*/
+/*
+---- = --------------*/
+/*
+X(s)
+C + sD + s*sE
+*/
+/*
+*/
+/*
+D
+2E
+E
+B
+B
+*/
+/*
+( --- + --- )Yn-1 - ( --- )Yn-2 + ( A + --- )Xn - ( --- )Xn-1
+*/
+/*
+T
+T*T
+T*T
+T
+T
+*/
+/* Yn = --------------------------------------------------------------*/
+/*
+D
+E
+*/
+/*
+C + --- + --*/
+/*
+T
+T*T
+*/
+/*
+*/
+/* Data_in is the input data array of float, data_out is the output array */
+/* of float, both hve length len. The float values A, B, C, D and E are
+*/
+/* time-cinstant of the circuit, T is the sampling time.
+*/
+/* The circuit’s initial conditions are Vu(t<0) = 0, and Vi(t<0) = 0.
+*/
+/***************************************************************************/
+void filter_1(float *data_in, float *data_out, float T, float A, float B,
+float C, float D, float E, int len)
+{
+int i;
+float a1,a2,a3,a4,a5;
+a1=(D/T+2*E/(T*T));
+a2=(E/(T*T));
+a3=(A+B/T);
+a4=(B/T);
+a5=(C+D/T+E/(T*T));
+data_out[0]=(a3*data_in[0]/a5);
+data_out[1]=(a1*data_out[0]+a3*data_in[1]-a4*data_in[0])/a5;
+for (i=2; i<len; i++)
+data_out[i]=(a1*data_out[i-1]-a2*data_out[i-2]+a3*data_in[i]-a4*data_in[i-1])/a5;
+}
+
+The code also is really simple and it is written for working on arrays input-output. It can be easily
+rearranged for true recursive operations.
+Charge-preamplifier application
+The schematic of the circuit is depicted in figure 11.3.
+Cf
+
+Rf
+
+Id
+
+Cd
+
+OUTPUT (Vu)
+
+Vi
+
+En
+
+Av(s) Vi
+
+Fig. 11.3 – Circuit used for charge-preamplifier application
+First of all the recursive equation must be evaluated. Supposing the following is the transferfunction of the op-amp:
+Av(s) =
+
+Rev. 2
+
+A
+⋅s+1
+
+54
+
+The signal (detector output current Id) and the noise transfer-functions must be evaluated:
+
+A
+-Rf ⋅
+Vu
+1+ A
+(s) =
+Rf ⋅ (Cf + Cd) ⋅  2
+Rf ⋅ Cd + 
+Id
+⋅ s + ( Rf ⋅ Cf +
+) ⋅ s +1
+1+ A
+1+ A
+This is the Id signal transfer-function, the corresponding recursive equation is:
+Vu n =
+
++
+
+(Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts + 2 ⋅ t) + Rf ⋅ Cd ⋅ (Ts + 2 ⋅  ) + Ts ⋅  )
+⋅ Vu n −1 +
+(1 + A) ⋅ Ts 2 + Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts +  ) + Rf ⋅ Cd ⋅ (Ts +  )
+
+− Rf ⋅ Cd ⋅ (CCf + Cd) ⋅ 
+⋅ Vu n − 2 +
+(1 + A) ⋅ Ts + Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts +  ) + Rf ⋅ Cd ⋅ (Ts +  )
+2
+
++
+
+− Rf ⋅ A ⋅ Ts2
+⋅ Id n
+(1 + A) ⋅ Ts2 + Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts +  ) + Rf ⋅ Cd ⋅ (Ts +  )
+
+For the noise:
+A
+⋅ (Rf ⋅ (Cf + Cd) ⋅ s + 1)
+Vu
+1
++
+A
+(s) =
+Rf ⋅ (Cf + Cd) ⋅  2
+Rf ⋅ Cd + 
+En
+⋅ s + (Rf ⋅ Cf +
+)⋅s+1
+1+ A
+1+ A
+
+This is the noise sample En transfer-function, the corresponding recursive equation is:
+Vu n =
+
++
+
+Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts + 2 ⋅  ) + Rf ⋅ Cd ⋅ (Ts + 2 ⋅  ) + Ts ⋅ 
+⋅ Vu n −1 +
+(1 + A) ⋅ Ts2 + Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts +  ) + Rf ⋅ Cd ⋅ (Ts +  )
+
+− Rf ⋅ (Cf + Cd) ⋅ 
+⋅ Vu n − 2 +
+(1 + A) ⋅ Ts + Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts +  ) + Rf ⋅ Cd ⋅ (Ts +  )
+2
+
++
+
+(Ts + Rf ⋅ (Cf + Cd)) ⋅ A ⋅ Ts
+⋅ En n +
+(1 + A) ⋅ Ts + Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts +  ) + Rf ⋅ Cd ⋅ (Ts +  )
+
++
+
+− Rf ⋅ (Cf + Cd)) ⋅ A ⋅ Ts
+⋅ En n-1
+(1 + A) ⋅ Ts + Rf ⋅ Cf ⋅ (Ts + A ⋅ Ts +  ) + Rf ⋅ Cd ⋅ (Ts +  )
+
+2
+
+2
+
+So, after evaluating the two arrays, one for the Id samples and the other for the noise samples, these
+can be used for evaluating the two Vun arrays. Then the two must be added for having the final
+output samples array. The sequence can be continually repeated resulting a sort of oscilloscope
+effect of the output signal. This was performed from my shareholder Andrea Puccini and me for
+ICARUS charge preamplifier and for FROST experiment. The sequence to be repeated is depicted
+in the following:
+
+Rev. 2
+
+55
+
+•
+•
+•
+•
+•
+•
+•
+
+clear screen;
+evaluate signal array;
+clear old trace if present;
+evaluate noise array;
+add to previously evaluated signal;
+plot on the screen;
+wait some time and return to clear old trace.
+
+Rev. 2
+
+56
+
+12.
+
+SERIAL-CHAIN FOR MUON TRACKING
+
+As stated in the chapter 3 only one data-way will be explained in this paper. This was used in old
+readout system for streamer tubes, now it is the one used when there is a lot of detectors whose
+status hit or not hit must be read. For example in muon telescope tracking. Using serial-chain the
+status of all the detectors are registered at trigger-time in a shift-register. After the shift-register is
+serially readout. Generally during readout are saved only the information relevant to hit detectors.
+The serial-chain readout is shown in figure 12.1.
+SERIN
+
+DETECTOR
+D0
+
+MICRO
+
+LOAD
+
+DAQ
+PORT
+
+CLOCK
+
+DETECTOR
+
+CONTROLLER
+
+SHIFT
+
+DETECTOR
+
+REGISTER
+RESET
+DETECTOR
+
+Q
+
+SR-FF
+SET
+
+TRIGGER IN
+
+DETECTOR
+Dn
+SEROUT
+
+Fig. 12.1 – Serial-chain for muon tracking
+The trigger circuit sets the flip-flop causing a parallel load to the shift-register. This loads in all the
+shift-register’s flip-flops the values of the discriminators connected to the relevant parallel inputs.
+The output state of each discriminator is active if the detector was hit in the one-shot time. So in the
+shift-register are registered ones and zeros, the ones are corresponding to the detector that was hit.
+After trigger the microcontroller reads the status of the load line, it detects that an event occurred
+and start readout. It consists in a burst of clock-cycles, one for each shift-register cells. Each clockcycle causes at the serout line the output of a cell in the register. For each clock-cycle the
+microcontroller reads the cell of one cell and store it in an array. At the end of the burst the
+microcontroller clears the flip-flop resetting the system. The data are now available to clients
+through the external port. The timing of the circuit is in figure 12.2.
+TRIGGER
+LOAD
+CLOCK
+CLEAR
+
+Fig. 12.2 – Timing in serial-chain readout system
+
+Rev. 2
+
+57
+
+The “serin” input to the shift-register can be used for two purposes: one for cascading other shiftregister in the chain, the other for filling the register with a test pattern sent from micro-controller.
+The test pattern then can be readout for testing the digital integrity of the readout system. A long
+shift-register can also be done using many smaller cascaded. This permits a layout divided in many
+cards each one hosting a slice of the readout system. Each slice can be complete of detector,
+discriminator and shift-register. In this way the micro-controller can be put anywhere, together to
+the trigger system.
+
+Rev. 2
+
+58
+
+13.
+
+LED PULSING
+
+In many applications a short light pulse is required. This can result driving a LED with a short
+pulse. The LED behaviours as a diode so it requires time for switching on and off. This time is
+required by the junction for carriers filling or depletion. In the diode model it results as a capacitor
+in parallel to the diode. For a LED a forward voltage Vf versus Id caracteristic is specified. There is
+a maximum Id value and there is a maximum power dissipation for such a device. Maximum Vf is
+corresponding to maximum Id and typically maximum power is:
+Pdmax = Vfmax∙Idmax.
+Idmax and Pdmax should not be exceed when driving LED. Peak and duty-cycle value Id and Pd can
+be found in the LED datasheet. Driving a LED with a voltage source results in charge or discharge
+of junction capacitor through the generator internal resistance. This has not a linear behaviour since
+the time-response has exponential. The LED lights from a Vf value smaller than Vfmax and the
+wavelength of emitted light depends upon Id. To avoid this the best way is to drive a LED with a
+constant current source. The simplest LED driver circuit is in the figure 13.1.
+Vcc
+
+Vrf
+
+PULSE
+
+Fig. 13.1 – Simplest LED driver
+The signal PULSE, active low, switches off the NPN transistor. When the transistor is off the
+current generator (i.e.: the op-amp, the voltage reference Vrf and the PNP transistor) feeds the LED
+diode and it lights. When it is on such a current flows in the NPN transistor and LED diode does not
+lights. The two diodes at the LED cathode allow reverse LED voltage and discharging of its
+junction. The Schottky diode between the base and the collector of the NPN transistor avoids the
+saturation allowing short light pulses. The LED brightness can be adjusted with the current (i.e.:
+adjusting reference Vrf or emitter resistor of current generator). This circuit properly works in a lot
+of circumstances, but the LED current is not the same when switching on or off. It can be a little
+trouble but for very fast light pulses another configuration is better. It is in the figure 13.2. Setting
+Idon = Idoff the LED is driven with the same on and off current. Remember the long-tail used as
+current switch. The clamping diode in parallel with the LED becomes on when the LED is off and
+its junction is discharged. It serves to limit the reverse LED voltage.
+
+Rev. 2
+
+59
+
+Vcc
+
+Idon+Idoff
+
+PULSE
+
+PECL
+Rt
+
+Idoff
+
+Fig. 13.2 – Symmetrical current LED driver
+Compared to the simplest LED driver this circuit has another advantage: the LED has cathode
+connected to ground. The circuit can also be redrawn for LED anode connected to ground. This
+allows LED driving via a transmission line like a shielded cable. In this case at least at one side the
+line must be properly terminated matching its characteristic impedance. When the LED is a little
+power device (i.e.: Vf/If > 50 Ω) the line termination can be at the LED side using a resistor. The
+value resulting from this resistor in parallel with the LED dynamic resistance must match the
+transmission line impedance. Obviously a little power will be dissipated by such a resistor but this
+avoids LED re-lights due to the reflected pulses. When LED is on the termination impedance of
+transmission line, at the generator side, is very high due to the current generator high output
+impedance. It becomes quite low when the LED is off and the clamping diode is on. If the LED is a
+little power device output line matching is possible with a resistor in parallel with the LED. This is
+not possible when the LED is not a little power device and Vf/If > 50 Ω. In this case a backtermination is suitable. It is a resistor in series with the clamping diode. It properly works only if the
+time for propagation along the transmission line is long enough to allow, ended the pulse, again the
+clamping diode becomes on. LED power pulsing is a difficult topic since these devices have great
+junction capacitance and require great current. Often the current required for fast junction charge or
+discharge is greater then the Idmax. This can be dangerous for the LED. Moreover these devices as a
+proper long Ton and Toff vanishing any attempt of shortening the light pulse. This is the some
+problem of opto-couplers speed. For great light pulses the solution can be to use more LEDs with
+more driver. In the figure 13.3 an adjustable current LED driver.
+Vcc
+
+R/2
+
+PULSE
+
+R
+
+PECL
+Rt
+
+R
+
+Variable
+Vrf
+
+Vee
+
+Fig. 13.3 – Adjustable current LED driver
+Rev. 2
+
+60
+
+R
+
+This circuit it is the same of that in figure 13.2. The current generators are drawn and their voltage
+reference are locked to the variable one. This results in constant ratio between the charge and the
+discharge current when its value is changed.
+
+Rev. 2
+
+61
+
+14.
+
+TO BE CONTINUED
+
+Next topics could be:
+•
+•
+•
+
+the spectroscopic chain;
+the spectroscopy amplifier;
+any other that could be interesting and I have something to write.
+
+THANKS
+Thanks to Yago Porto who revised formalism is LaPlace transform topic. He was the first in finding
+errors in this paper.
+
+Rev. 2
+
+62
+
+
